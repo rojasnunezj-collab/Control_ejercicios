@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Entrenador en Casa — Control de Series y Pesas</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-alt: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --green: #10b981;
+      --blue: #3b82f6;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 12px; padding-bottom: 40px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .header h1 { font-size: 1.15rem; font-weight: 800; color: #38bdf8; }
+    .btn-icon { background: var(--card); border: 1px solid var(--card-alt); color: var(--text); padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; cursor: pointer; }
+    .card { background: var(--card); border-radius: 16px; padding: 14px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.06); }
+    .card-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 8px; font-weight: 700; }
+
+    /* Pre-entreno & Vitaminas */
+    .supp-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .btn-scoop { flex: 1; background: linear-gradient(135deg, #ea580c, #dc2626); color: #fff; border: none; border-radius: 12px; padding: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
+    .scoop-timer-box { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--orange); border-radius: 12px; padding: 10px; margin-top: 10px; text-align: center; display: none; }
+    .scoop-timer-val { font-size: 1.8rem; font-weight: 900; color: var(--orange); }
+    .vit-pills { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .pill { background: var(--bg); border: 1px solid var(--card-alt); color: var(--muted); padding: 6px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .pill.active { background: rgba(16, 185, 129, 0.2); border-color: var(--green); color: #fff; }
+
+    /* Selector de Bloque */
+    .day-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+    .day-tab { background: var(--card); border: 1px solid var(--card-alt); color: var(--muted); padding: 10px 6px; border-radius: 12px; font-size: 0.78rem; font-weight: 700; text-align: center; cursor: pointer; }
+    .day-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+    /* Panel Principal de Ejercicio */
+    .ex-header { margin-bottom: 10px; }
+    .ex-progress { font-size: 0.8rem; color: #38bdf8; font-weight: 700; margin-bottom: 4px; }
+    .ex-name { font-size: 1.2rem; font-weight: 800; line-height: 1.25; margin-bottom: 6px; }
+    .ex-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .badge { background: var(--bg); padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; color: #e2e8f0; border: 1px solid var(--card-alt); }
+    .badge.weight { color: var(--orange); border-color: rgba(245,158,11,0.4); }
+    .badge.side { color: #c084fc; border-color: rgba(192,132,252,0.4); }
+
+    /* Pantalla Gigante de Estado */
+    .stage-box { border-radius: 18px; padding: 18px 14px; text-align: center; margin: 10px 0; transition: all 0.2s; border: 2px solid transparent; }
+    .stage-idle { background: rgba(59, 130, 246, 0.12); border-color: var(--blue); }
+    .stage-prep { background: rgba(245, 158, 11, 0.18); border-color: var(--orange); }
+    .stage-work { background: rgba(16, 185, 129, 0.16); border-color: var(--green); }
+    .stage-rest { background: rgba(59, 130, 246, 0.18); border-color: #38bdf8; }
+    .stage-setup { background: rgba(245, 158, 11, 0.2); border-color: var(--orange); }
+
+    .set-banner { font-size: 1.35rem; font-weight: 900; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .sub-banner { font-size: 0.9rem; color: var(--muted); margin-bottom: 10px; }
+    .giant-num { font-size: 4.2rem; font-weight: 900; line-height: 1; margin: 10px 0; font-variant-numeric: tabular-nums; }
+    .secondary-timer { font-size: 1.05rem; font-weight: 700; color: #cbd5e1; margin-bottom: 12px; }
+
+    /* Botones Gigantes para Entrenar sin Mirar */
+    .btn-giant { width: 100%; border: none; border-radius: 16px; padding: 20px 14px; font-size: 1.25rem; font-weight: 900; color: #fff; cursor: pointer; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .btn-green { background: var(--green); }
+    .btn-blue { background: var(--blue); }
+    .btn-orange { background: var(--orange); color: #0f172a; }
+    .btn-yellow { background: #eab308; color: #0f172a; font-size: 1.05rem; padding: 15px; }
+
+    .quick-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+    .btn-quick { background: var(--card-alt); color: #fff; border: none; padding: 12px 8px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; }
+
+    /* Selectores Rápidos Guardables (30s / 60s / Prep) */
+    .config-strip { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.07); font-size: 0.82rem; }
+    .config-strip:first-child { border-top: none; }
+    .seg-group { display: flex; gap: 5px; }
+    .seg-btn { background: var(--bg); color: var(--muted); border: 1px solid var(--card-alt); padding: 6px 10px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .seg-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+
+    /* Resumen de Tiempos Acumulados */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+    .stat-item { background: var(--bg); padding: 10px 6px; border-radius: 12px; }
+    .stat-val { font-size: 1.1rem; font-weight: 900; color: #fff; }
+    .stat-lbl { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+    /* Modal de Configuración */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 99; padding: 20px; align-items: center; justify-content: center; }
+    .modal-content { background: var(--card); width: 100%; max-width: 420px; border-radius: 16px; padding: 18px; border: 1px solid var(--card-alt); }
+    .input-text { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--card-alt); background: var(--bg); color: #fff; margin: 8px 0 14px; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA SUPERIOR -->
+  <div class="header">
+    <h1>🏋️ Mi Entreno en Casa</h1>
+    <div style="display:flex; gap:6px;">
+      <button class="btn-icon" id="btnVoiceToggle" onclick="toggleVoice()">🔊 Voz: ON</button>
+      <button class="btn-icon" onclick="openSettings()">⚙️ Sheets</button>
+    </div>
+  </div>
+
+  <!-- PANEL 1: PRE-ENTRENO Y VITAMINAS -->
+  <div class="card">
+    <div class="card-title">⚡ Suplementación y Pre-Entreno</div>
+    <div class="supp-row">
+      <button class="btn-scoop" onclick="tomarPreEntreno()">
+        ⚡ Tomé mi Scoop de Pre-Entreno
+      </button>
+      <div style="text-align:right; min-width:85px;">
+        <div style="font-size:0.72rem; color:var(--muted);">Quedan en bote:</div>
+        <div style="font-size:1.1rem; font-weight:900;" id="scoopCountDisplay">30 scoops</div>
+      </div>
+    </div>
+
+    <!-- Cuenta regresiva de activación del Scoop -->
+    <div class="scoop-timer-box" id="scoopTimerBox">
+      <div style="font-size:0.78rem; color:#fde68a; font-weight:700;">⏳ ACTIVANDO PRE-ENTRENO (Mientras armas pesas)</div>
+      <div class="scoop-timer-val" id="scoopTimerVal">15:00</div>
+      <div class="seg-group" style="justify-content:center; margin-top:6px;">
+        <button class="seg-btn" onclick="setScoopMinutes(10)">10m</button>
+        <button class="seg-btn active" onclick="setScoopMinutes(15)">15m</button>
+        <button class="seg-btn" onclick="setScoopMinutes(20)">20m</button>
+        <button class="seg-btn" onclick="stopScoopTimer()">Omitir</button>
+      </div>
+    </div>
+
+    <div class="vit-pills">
+      <span class="pill" id="vit-multi" onclick="toggleVitamin('multi', 'Multivitamínico')">💊 Multivitamínico</span>
+      <span class="pill" id="vit-crea" onclick="toggleVitamin('crea', 'Creatina')">⚡ Creatina</span>
+      <span class="pill" id="vit-omega" onclick="toggleVitamin('omega', 'Omega 3')">🐟 Omega 3</span>
+    </div>
+  </div>
+
+  <!-- SELECTOR DE BLOQUE (DETECTA EL DÍA AUTOMÁTICAMENTE) -->
+  <div class="day-tabs">
+    <div class="day-tab" id="tab-b1" onclick="selectBlock('b1')">LUN / JUE<br>Bloque 1: Empuje</div>
+    <div class="day-tab" id="tab-b2" onclick="selectBlock('b2')">MAR / VIE<br>Bloque 2: Tracción</div>
+    <div class="day-tab" id="tab-b3" onclick="selectBlock('b3')">MIÉ / SÁB<br>Bloque 3: Piernas</div>
+  </div>
+
+  <!-- PANEL PRINCIPAL DE EJERCICIO -->
+  <div class="card" id="workoutContainer">
+    <div class="ex-header">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="ex-progress" id="exProgressText">EJERCICIO 1 DE 6</span>
+        <div style="display:flex; gap:6px;">
+          <button class="seg-btn" onclick="prevExercise()">◀ Ant</button>
+          <button class="seg-btn" onclick="nextExercise()">Sig ▶</button>
+        </div>
+      </div>
+      <div class="ex-name" id="exNameText">Cargando...</div>
+      <div class="ex-badges">
+        <span class="badge weight" id="exWeightBadge">24 kg</span>
+        <span class="badge" id="exTargetBadge">4 series x 12 reps</span>
+        <span class="badge side" id="exSideBadge" style="display:none;">Lado Izquierdo</span>
+      </div>
+    </div>
+
+    <!-- CAJA DINÁMICA DEL ESTADO ACTUAL -->
+    <div class="stage-box stage-idle" id="stageBox">
+      <div class="set-banner" id="stageBanner">SERIE 1 DE 4</div>
+      <div class="sub-banner" id="stageSubBanner">Listo para arrancar</div>
+      <div class="giant-num" id="giantDisplay">0 / 12</div>
+      <div class="secondary-timer" id="secondaryTimer">Tiempo en serie: 00:00</div>
+
+      <!-- CONTROLES DINÁMICOS SEGÚN FASE -->
+      <div id="dynamicControls"></div>
+    </div>
+
+    <!-- CONFIGURACIÓN PERMANENTE DEL EJERCICIO ACTUAL -->
+    <div style="margin-top:12px;">
+      <div class="card-title">⚙️ Tus tiempos guardados para este ejercicio</div>
+
+      <div class="config-strip">
+        <span>😮‍💨 Descanso entre series:</span>
+        <div class="seg-group" id="restSetGroup">
+          <button class="seg-btn" onclick="updateExConfig('descansoSerie', 30)">30s</button>
+          <button class="seg-btn" onclick="updateExConfig('descansoSerie', 60)">60s</button>
+          <button class="seg-btn" onclick="updateExConfig('descansoSerie', 90)">90s</button>
+        </div>
+      </div>
+
+      <div class="config-strip">
+        <span>🔧 Descanso tras armar pesas:</span>
+        <div class="seg-group" id="restSetupGroup">
+          <button class="seg-btn" onclick="updateExConfig('descansoArmado', 30)">30s</button>
+          <button class="seg-btn" onclick="updateExConfig('descansoArmado', 60)">60s</button>
+          <button class="seg-btn" onclick="updateExConfig('descansoArmado', 90)">90s</button>
+        </div>
+      </div>
+
+      <div class="config-strip">
+        <span>⏳ Tiempo para acomodarte (Prep):</span>
+        <div class="seg-group" id="prepGroup">
+          <button class="seg-btn" onclick="updateExConfig('prepSeg', 5)">5s</button>
+          <button class="seg-btn" onclick="updateExConfig('prepSeg', 10)">10s</button>
+          <button class="seg-btn" onclick="updateExConfig('prepSeg', 15)">15s</button>
+        </div>
+      </div>
+
+      <div class="config-strip">
+        <span>🗣️ Ritmo base de voz (Serie 1):</span>
+        <div class="seg-group">
+          <button class="seg-btn" onclick="adjustPace(-0.3)">-0.3s</button>
+          <span id="paceLabel" style="padding:6px 8px; font-weight:800; color:#38bdf8;">2.8s/rep</span>
+          <button class="seg-btn" onclick="adjustPace(0.3)">+0.3s</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMEN EN VIVO DE LOS 3 RELOJES -->
+  <div class="card">
+    <div class="card-title">📊 Tus 3 Relojes de Hoy (Trabajo vs Armado vs Descanso)</div>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-val" id="totWorkVal" style="color:var(--green);">00:00</div>
+        <div class="stat-lbl">En Serie (Fuerza)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="totSetupVal" style="color:var(--orange);">00:00</div>
+        <div class="stat-lbl">Armando Pesas</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="totRestVal" style="color:#38bdf8;">00:00</div>
+        <div class="stat-lbl">Descansando</div>
+      </div>
+    </div>
+    <button class="btn-quick" style="width:100%; margin-top:10px; background:#0f766e;" onclick="finishWorkoutSession()">
+      ✅ Finalizar Entrenamiento y Enviar Resumen
+    </button>
+  </div>
+
+  <!-- MODAL PARA VINCULAR CON GOOGLE SHEETS -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom:8px;">🔗 Conexión con tu Google Sheets</h3>
+      <p style="font-size:0.8rem; color:var(--muted);">
+        Pega aquí la URL de la Aplicación Web que te dio Google Apps Script al darle a "Implementar". Quedará guardada en tu celular.
+      </p>
+      <input type="text" id="gasUrlInput" class="input-text" placeholder="https://script.google.com/macros/s/.../exec" />
+      <label style="font-size:0.8rem; color:var(--muted);">Scoops actuales en tu bote de Pre-Entreno:</label>
+      <input type="number" id="scoopTotalInput" class="input-text" value="30" />
+      <div style="display:flex; gap:8px;">
+        <button class="btn-quick" style="flex:1; background:var(--green);" onclick="saveSettings()">Guardar</button>
+        <button class="btn-quick" style="flex:1;" onclick="closeSettings()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/**
+ * ============================================================================
+ * BASE DE DATOS DE TU RUTINA EXACTA (3 BLOQUES)
+ * ============================================================================
+ */
+const RUTINA = {
+  b1: {
+    titulo: "Lunes y Jueves — Bloque 1: Empuje",
+    ejercicios: [
+      { id: "b1_e1", nombre: "Compuesto: Remo vertical agarre abierto + Press militar con barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5 },
+      { id: "b1_e2", nombre: "Press en Puente de Glúteos", peso: "Barra 24 kg / Manc. 14 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10 },
+      { id: "b1_e3", nombre: "Press Hexagonal (Squeeze Press) en Puente de Glúteos", peso: "Mancuernas 14 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10 },
+      { id: "b1_e4", nombre: "Flexiones con Manos en Banco (Pecho Bajo)", peso: "Peso Corporal", series: 4, reps: 12, tipo: "normal", prepDefault: 5 },
+      { id: "b1_e5", nombre: "Extensión de Tríceps tras Nuca / Copa sentado", peso: "Mancuerna 14 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5 },
+      { id: "b1_e6", nombre: "Fondos en Banco", peso: "Peso Corporal", series: 4, reps: 15, tipo: "normal", prepDefault: 5 }
+    ]
+  },
+  b2: {
+    titulo: "Martes y Viernes — Bloque 2: Tracción y Laterales",
+    ejercicios: [
+      { id: "b2_e1", nombre: "Curl de Bíceps con Barra Recta de Pie", peso: "Barra 24 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5 },
+      { id: "b2_e2", nombre: "Curl Inverso con Barra / Press Invertido", peso: "Barra 20 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5 },
+      { id: "b2_e3", nombre: "Curl Concentrado Sentado con Mancuerna", peso: "Mancuerna 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Brazo Izquierdo", "Brazo Derecho"], prepDefault: 5 },
+      { id: "b2_e4", nombre: "Encogimientos de Hombros tras Espalda con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5 },
+      { id: "b2_e5", nombre: "Superserie Hombros: Elevaciones Laterales + Vuelos Posteriores", peso: "Mancuernas 7 kg", series: 4, reps: 12, tipo: "superserie", partes: ["1/2: Elevaciones Laterales (7 kg)", "2/2: Vuelos Posteriores Inclinados (7 kg)"], prepDefault: 5 }
+    ]
+  },
+  b3: {
+    titulo: "Miércoles y Sábado — Bloque 3: Piernas, Oblicuos y Potencia",
+    ejercicios: [
+      { id: "b3_e1", nombre: "Compuesto Funcional: Cargada/Curl Neutro + Press Unilateral", peso: "Mancuerna 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5 },
+      { id: "b3_e2", nombre: "Sentadilla con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10 },
+      { id: "b3_e3", nombre: "Zancadas hacia adelante con Mancuernas", peso: "Mancuernas 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Pierna Izquierda", "Pierna Derecha"], prepDefault: 5 },
+      { id: "b3_e4", nombre: "Elevaciones de Pantorrilla con Barra", peso: "Barra 24 kg", series: 4, reps: 20, tipo: "normal", prepDefault: 5 },
+      { id: "b3_e5", nombre: "Leñador Diagonal (Woodchopper) con Mancuerna", peso: "Mancuerna 14 kg", series: 4, reps: 12, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5 },
+      { id: "b3_e6", nombre: "Superserie Oblicuos: Giros Rusos + Plancha Lateral", peso: "Mancuerna 14 kg / Corporal", series: 4, reps: 16, tipo: "oblicuos_especial", partes: ["1/3: Giros Rusos (16 reps)", "2/3: Plancha Lateral Izq (12 reps)", "3/3: Plancha Lateral Der (12 reps)"], prepDefault: 5 }
+    ]
+  }
+};
+
+// Factores de fatiga por serie: Serie 1 (0%), Serie 2 (+8%), Serie 3 (+15%), Serie 4 (+22%)
+const FATIGUE_FACTORS = [1.0, 1.08, 1.15, 1.22];
+
+// Estado Global
+let currentBlockKey = "b1";
+let currentExIdx = 0;
+let currentSet = 1;
+let currentPartIdx = 0;
+let stage = "IDLE"; // IDLE, PREP, WORK, CONFIRM_REPS, REST_SET, SETUP_WEIGHTS, REST_AFTER_SETUP
+let timerInterval = null;
+let repTimeout = null;
+
+let currentRepCount = 0;
+let currentWorkSeconds = 0;
+let currentSetupSeconds = 0;
+let lastSetupLoggedSeconds = 0;
+let restRemainingSeconds = 0;
+let prepRemainingSeconds = 0;
+let confirmedReps = 12;
+
+let totalWorkSec = 0;
+let totalSetupSec = 0;
+let totalRestSec = 0;
+let preWorkoutTaken = false;
+
+let voiceEnabled = true;
+let audioCtx = null;
+let savedConfigs = JSON.parse(localStorage.getItem("gym_configs_v1") || "{}");
+let gasUrl = localStorage.getItem("gym_gas_url") || "";
+let scoopRemaining = Number(localStorage.getItem("gym_scoops_left") || 30);
+let scoopInterval = null;
+let scoopSecondsLeft = 15 * 60;
+
+// Inicialización Telegram WebApp + WakeLock
+window.addEventListener("DOMContentLoaded", () => {
+  if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+  }
+  requestWakeLock();
+  document.getElementById("scoopCountDisplay").innerText = scoopRemaining + " scoops";
+  document.getElementById("gasUrlInput").value = gasUrl;
+  document.getElementById("scoopTotalInput").value = scoopRemaining;
+
+  // Detectar día de la semana automáticamente (1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb)
+  const day = new Date().getDay();
+  if (day === 2 || day === 5) selectBlock("b2");
+  else if (day === 3 || day === 6) selectBlock("b3");
+  else selectBlock("b1");
+
+  if (gasUrl) syncConfigsFromSheets();
+});
+
+async function requestWakeLock() {
+  try {
+    if ("wakeLock" in navigator) {
+      await navigator.wakeLock.request("screen");
+    }
+  } catch (e) {}
+}
+
+// ============================================================================
+// AUDIO SINTETIZADO Y VOZ (SIN ARCHIVOS EXTERNOS)
+// ============================================================================
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume();
+}
+
+function playBeep(freq = 600, duration = 0.12, type = "sine") {
+  try {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (e) {}
+}
+
+function speak(text) {
+  if (!voiceEnabled || !("speechSynthesis" in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "es-ES";
+    u.rate = 1.15;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+function toggleVoice() {
+  voiceEnabled = !voiceEnabled;
+  document.getElementById("btnVoiceToggle").innerText = voiceEnabled ? "🔊 Voz: ON" : "🔇 Voz: OFF";
+}
+
+// ============================================================================
+// GESTIÓN DE CONFIGURACIÓN POR EJERCICIO (LOCAL + SHEETS)
+// ============================================================================
+function getExConfig(ex) {
+  if (!savedConfigs[ex.id]) {
+    savedConfigs[ex.id] = {
+      peso: ex.peso,
+      descansoSerie: 60,
+      descansoArmado: 30,
+      prepSeg: ex.prepDefault || 5,
+      segPorRep: 2.8
+    };
+  }
+  return savedConfigs[ex.id];
+}
+
+function updateExConfig(field, value) {
+  const ex = getCurrentEx();
+  const cfg = getExConfig(ex);
+  cfg[field] = value;
+  localStorage.setItem("gym_configs_v1", JSON.stringify(savedConfigs));
+  renderExerciseConfigButtons();
+  sendToSheets({
+    accion: "guardar_config",
+    idEjercicio: ex.id,
+    nombre: ex.nombre,
+    peso: cfg.peso,
+    descansoSerie: cfg.descansoSerie,
+    descansoArmado: cfg.descansoArmado,
+    prepSeg: cfg.prepSeg,
+    segPorRep: cfg.segPorRep
+  });
+}
+
+function adjustPace(delta) {
+  const ex = getCurrentEx();
+  const cfg = getExConfig(ex);
+  cfg.segPorRep = Math.max(1.2, Math.min(6.0, Number((cfg.segPorRep + delta).toFixed(1))));
+  updateExConfig("segPorRep", cfg.segPorRep);
+}
+
+// ============================================================================
+// LÓGICA DE NAVEGACIÓN Y PARTES DEL EJERCICIO
+// ============================================================================
+function getCurrentEx() {
+  return RUTINA[currentBlockKey].ejercicios[currentExIdx];
+}
+
+function getTargetRepsForCurrentPart(ex) {
+  if (ex.tipo === "oblicuos_especial") {
+    return currentPartIdx === 0 ? 16 : 12;
+  }
+  return ex.reps;
+}
+
+function getTotalPartsForCurrentSet(ex) {
+  if (ex.tipo === "unilateral" || ex.tipo === "superserie") return 2;
+  if (ex.tipo === "oblicuos_especial") {
+    // En la serie 4 solo se hacen Giros Rusos (1 parte)
+    return currentSet <= 3 ? 3 : 1;
+  }
+  return 1;
+}
+
+function selectBlock(blockKey) {
+  clearTimers();
+  currentBlockKey = blockKey;
+  currentExIdx = 0;
+  currentSet = 1;
+  currentPartIdx = 0;
+  stage = "IDLE";
+  ["b1", "b2", "b3"].forEach(k => {
+    document.getElementById("tab-" + k).classList.toggle("active", k === blockKey);
+  });
+  renderAll();
+}
+
+function prevExercise() {
+  if (currentExIdx > 0) {
+    clearTimers();
+    currentExIdx--;
+    currentSet = 1;
+    currentPartIdx = 0;
+    stage = "IDLE";
+    renderAll();
+  }
+}
+
+function nextExercise() {
+  const list = RUTINA[currentBlockKey].ejercicios;
+  if (currentExIdx < list.length - 1) {
+    clearTimers();
+    currentExIdx++;
+    currentSet = 1;
+    currentPartIdx = 0;
+    stage = "IDLE";
+    renderAll();
+  }
+}
+
+// ============================================================================
+// FLUJO CENTRAL DE LOS ESTADOS: PREP -> SERIE -> REPS -> DESCANSO / ARMADO
+// ============================================================================
+function clearTimers() {
+  if (timerInterval) clearInterval(timerInterval);
+  if (repTimeout) clearTimeout(repTimeout);
+  timerInterval = null;
+  repTimeout = null;
+}
+
+// 1. Iniciar Preparación (con opción de reiniciar si no estabas listo)
+function startPrepCountdown(extraSeconds = 0) {
+  initAudio();
+  clearTimers();
+  const ex = getCurrentEx();
+  const cfg = getExConfig(ex);
+  stage = "PREP";
+  prepRemainingSeconds = (extraSeconds > 0) ? extraSeconds : cfg.prepSeg;
+
+  speak("En posición, " + prepRemainingSeconds + " segundos");
+  renderAll();
+
+  timerInterval = setInterval(() => {
+    prepRemainingSeconds--;
+    if (prepRemainingSeconds <= 3 && prepRemainingSeconds > 0) {
+      playBeep(520, 0.1);
+      speak(String(prepRemainingSeconds));
+    }
+    renderStageBox();
+    if (prepRemainingSeconds <= 0) {
+      clearTimers();
+      startActiveWorkSet();
+    }
+  }, 1000);
+}
+
+// Botón +5s si aún se está acomodando con las pesas
+function addPrepTime(sec) {
+  prepRemainingSeconds += sec;
+  speak("Más " + sec + " segundos");
+  renderStageBox();
+}
+
+// 2. En Serie (Marcapasos con Compensación de Fatiga + Reloj de Esfuerzo)
+function startActiveWorkSet() {
+  clearTimers();
+  stage = "WORK";
+  currentRepCount = 0;
+  currentWorkSeconds = 0;
+
+  const ex = getCurrentEx();
+  const cfg = getExConfig(ex);
+  const targetReps = getTargetRepsForCurrentPart(ex);
+  const fatigueMultiplier = FATIGUE_FACTORS[Math.min(currentSet - 1, FATIGUE_FACTORS.length - 1)];
+  const effectiveSecPerRep = Number((cfg.segPorRep * fatigueMultiplier).toFixed(2));
+
+  playBeep(880, 0.25, "triangle");
+  speak("¡Va!");
+  renderAll();
+
+  // Reloj real de segundos en serie
+  timerInterval = setInterval(() => {
+    currentWorkSeconds++;
+    totalWorkSec++;
+    updateTotalsUI();
+    renderStageBox();
+  }, 1000);
+
+  // Marcapasos de repeticiones
+  function scheduleNextRep() {
+    repTimeout = setTimeout(() => {
+      if (stage !== "WORK") return;
+      currentRepCount++;
+      playBeep(660, 0.08);
+      if (currentRepCount <= targetReps) {
+        speak(String(currentRepCount));
+      }
+      renderStageBox();
+      if (currentRepCount < targetReps) {
+        scheduleNextRep();
+      } else {
+        // Llegó a la meta de repeticiones del marcapasos
+        playBeep(980, 0.3, "triangle");
+      }
+    }, effectiveSecPerRep * 1000);
+  }
+  scheduleNextRep();
+}
+
+// ¡SOLUCIÓN CLAVE!: Reiniciar el conteo de la serie si aún no habías empezado
+function restartCurrentSetCountdown() {
+  // Restamos los segundos que habían corrido de esta serie abortada
+  totalWorkSec = Math.max(0, totalWorkSec - currentWorkSeconds);
+  currentWorkSeconds = 0;
+  currentRepCount = 0;
+  updateTotalsUI();
+  startPrepCountdown();
+}
+
+// 3. Terminar Serie -> Confirmar Reps (y autocalibrar en Serie 1 si desea)
+function finishWorkSet() {
+  clearTimers();
+  const ex = getCurrentEx();
+  confirmedReps = getTargetRepsForCurrentPart(ex);
+  stage = "CONFIRM_REPS";
+  playBeep(750, 0.18);
+  renderAll();
+}
+
+function adjustConfirmedReps(delta) {
+  confirmedReps = Math.max(1, confirmedReps + delta);
+  renderStageBox();
+}
+
+function confirmSetAndProceed(calibratePace = false) {
+  const ex = getCurrentEx();
+  const cfg = getExConfig(ex);
+
+  if (calibratePace && confirmedReps > 0 && currentWorkSeconds >= 5) {
+    cfg.segPorRep = Number((currentWorkSeconds / confirmedReps).toFixed(1));
+    updateExConfig("segPorRep", cfg.segPorRep);
+  }
+
+  const totalParts = getTotalPartsForCurrentSet(ex);
+  const ladoNombre = ex.partes ? ex.partes[currentPartIdx] : "Completo";
+
+  // Enviar registro de la serie a Google Sheets
+  sendToSheets({
+    accion: "guardar_serie",
+    bloque: RUTINA[currentBlockKey].titulo,
+    ejercicio: ex.nombre,
+    serie: currentSet,
+    lado: ladoNombre,
+    reps: confirmedReps,
+    peso: cfg.peso,
+    tiempoSerieSeg: currentWorkSeconds,
+    tiempoArmadoSeg: lastSetupLoggedSeconds,
+    tiempoDescansoSeg: cfg.descansoSerie
+  });
+  lastSetupLoggedSeconds = 0;
+
+  // ¿Falta el otro brazo/pierna o la segunda parte de la superserie?
+  if (currentPartIdx + 1 < totalParts) {
+    currentPartIdx++;
+    // Pequeña preparación de cambio de mano/ejercicio sin meter descanso largo
+    startPrepCountdown(8);
+    return;
+  }
+
+  // Se completaron todas las partes de esta serie
+  currentPartIdx = 0;
+
+  if (currentSet < ex.series) {
+    // Pasa al descanso normal entre series
+    currentSet++;
+    startRestTimer("REST_SET", cfg.descansoSerie);
+  } else {
+    // ¡Terminó todas las series de este ejercicio!
+    const list = RUTINA[currentBlockKey].ejercicios;
+    if (currentExIdx < list.length - 1) {
+      // Pasa a FASE DE ARMADO DE PESAS para el siguiente ejercicio
+      currentExIdx++;
+      currentSet = 1;
+      currentPartIdx = 0;
+      startWeightSetupPhase();
+    } else {
+      stage = "IDLE";
+      speak("¡Felicidades! Terminaste todo el bloque de hoy.");
+      alert("🎉 ¡Bloque completado! Toca 'Finalizar Entrenamiento' abajo para guardar tu resumen.");
+      renderAll();
+    }
+  }
+}
+
+// 4. Descanso entre Series (o Descanso Post-Armado)
+function startRestTimer(restType, seconds) {
+  clearTimers();
+  stage = restType; // "REST_SET" o "REST_AFTER_SETUP"
+  restRemainingSeconds = seconds;
+  renderAll();
+
+  timerInterval = setInterval(() => {
+    restRemainingSeconds--;
+    totalRestSec++;
+    updateTotalsUI();
+
+    if (restRemainingSeconds <= 3 && restRemainingSeconds > 0) {
+      playBeep(500, 0.12);
+    }
+    renderStageBox();
+
+    if (restRemainingSeconds <= 0) {
+      clearTimers();
+      playBeep(920, 0.35, "square");
+      speak("¡Tiempo! Listo para la serie " + currentSet);
+      stage = "IDLE";
+      renderAll();
+    }
+  }, 1000);
+}
+
+function adjustRestLive(delta) {
+  restRemainingSeconds = Math.max(0, restRemainingSeconds + delta);
+  renderStageBox();
+}
+
+// 5. Fase de Armado / Cambio de Discos entre Ejercicio y Ejercicio
+function startWeightSetupPhase() {
+  clearTimers();
+  stage = "SETUP_WEIGHTS";
+  currentSetupSeconds = 0;
+  const nextEx = getCurrentEx();
+  speak("Cambio de ejercicio. Armar " + nextEx.peso);
+  renderAll();
+
+  timerInterval = setInterval(() => {
+    currentSetupSeconds++;
+    totalSetupSec++;
+    updateTotalsUI();
+    renderStageBox();
+  }, 1000);
+}
+
+// Al terminar de armar las pesas -> Entra el Descanso entre Ejercicio y Ejercicio
+function finishWeightSetup(skipRest = false) {
+  clearTimers();
+  lastSetupLoggedSeconds = currentSetupSeconds;
+  const ex = getCurrentEx();
+  const cfg = getExConfig(ex);
+
+  if (skipRest) {
+    stage = "IDLE";
+    renderAll();
+  } else {
+    speak("Pesas listas. Descanso previo al ejercicio.");
+    startRestTimer("REST_AFTER_SETUP", cfg.descansoArmado);
+  }
+}
+
+// ============================================================================
+// RENDERIZADO DE LA INTERFAZ
+// ============================================================================
+function renderAll() {
+  const list = RUTINA[currentBlockKey].ejercicios;
+  const ex = getCurrentEx();
+  const cfg = getExConfig(ex);
+
+  document.getElementById("exProgressText").innerText = `EJERCICIO ${currentExIdx + 1} DE ${list.length}`;
+  document.getElementById("exNameText").innerText = ex.nombre;
+  document.getElementById("exWeightBadge").innerText = "🏋️ " + cfg.peso;
+  document.getElementById("exTargetBadge").innerText = `🎯 ${ex.series} series x ${ex.reps} reps`;
+
+  const sideBadge = document.getElementById("exSideBadge");
+  if (ex.partes && getTotalPartsForCurrentSet(ex) > 1) {
+    sideBadge.style.display = "inline-block";
+    sideBadge.innerText = "👉 " + ex.partes[currentPartIdx];
+  } else {
+    sideBadge.style.display = "none";
+  }
+
+  renderExerciseConfigButtons();
+  renderStageBox();
+}
+
+function renderExerciseConfigButtons() {
+  const cfg = getExConfig(getCurrentEx());
+  document.getElementById("paceLabel").innerText = cfg.segPorRep + "s/rep";
+
+  Array.from(document.getElementById("restSetGroup").children).forEach(btn => {
+    btn.classList.toggle("active", btn.innerText === cfg.descansoSerie + "s");
+  });
+  Array.from(document.getElementById("restSetupGroup").children).forEach(btn => {
+    btn.classList.toggle("active", btn.innerText === cfg.descansoArmado + "s");
+  });
+  Array.from(document.getElementById("prepGroup").children).forEach(btn => {
+    btn.classList.toggle("active", btn.innerText === cfg.prepSeg + "s");
+  });
+}
+
+function renderStageBox() {
+  const ex = getCurrentEx();
+  const cfg = getExConfig(ex);
+  const box = document.getElementById("stageBox");
+  const banner = document.getElementById("stageBanner");
+  const sub = document.getElementById("stageSubBanner");
+  const giant = document.getElementById("giantDisplay");
+  const secTimer = document.getElementById("secondaryTimer");
+  const controls = document.getElementById("dynamicControls");
+
+  const targetReps = getTargetRepsForCurrentPart(ex);
+  const partLabel = (ex.partes && getTotalPartsForCurrentSet(ex) > 1) ? ` (${ex.partes[currentPartIdx]})` : "";
+
+  box.className = "stage-box";
+
+  if (stage === "IDLE") {
+    box.classList.add("stage-idle");
+    banner.innerText = `SERIE ${currentSet} DE ${ex.series}${partLabel}`;
+    const fatPct = Math.round((FATIGUE_FACTORS[Math.min(currentSet - 1, 3)] - 1) * 100);
+    sub.innerText = fatPct > 0
+      ? `Ritmo ajustado por fatiga (+${fatPct}% más margen)`
+      : `Preparación: ${cfg.prepSeg}s antes de contar`;
+    giant.innerText = `0 / ${targetReps}`;
+    secTimer.innerText = `Descanso configurado: ${cfg.descansoSerie}s`;
+    controls.innerHTML = `
+      <button class="btn-giant btn-green" onclick="startPrepCountdown()">
+        ▶️ INICIAR SERIE ${currentSet}
+      </button>
+    `;
+  }
+  else if (stage === "PREP") {
+    box.classList.add("stage-prep");
+    banner.innerText = `⏳ ACOMÓDATE CON LAS PESAS`;
+    sub.innerText = `Serie ${currentSet} de ${ex.series}${partLabel}`;
+    giant.innerText = prepRemainingSeconds + "s";
+    secTimer.innerText = "El conteo por voz empezará al llegar a 0";
+    controls.innerHTML = `
+      <button class="btn-giant btn-yellow" onclick="addPrepTime(5)">
+        ✋ +5 SEGUNDOS MÁS (Aún me estoy acomodando)
+      </button>
+      <button class="btn-quick" style="width:100%;" onclick="startActiveWorkSet()">
+        ⚡ Ya estoy listo, contar YA
+      </button>
+    `;
+  }
+  else if (stage === "WORK") {
+    box.classList.add("stage-work");
+    banner.innerText = `🟢 EN SERIE ${currentSet} DE ${ex.series}${partLabel}`;
+    sub.innerText = "El marcapasos te guía en voz alta";
+    giant.innerText = `${currentRepCount} / ${targetReps}`;
+    secTimer.innerText = `⏱️ Tiempo en serie: ${formatMMSS(currentWorkSeconds)}`;
+    controls.innerHTML = `
+      <button class="btn-giant btn-green" onclick="finishWorkSet()">
+        ✅ TERMINÉ LA SERIE (Solté pesas)
+      </button>
+      <button class="btn-giant btn-yellow" onclick="restartCurrentSetCountdown()">
+        🔄 REINICIAR CONTEO (Aún no había empezado)
+      </button>
+    `;
+  }
+  else if (stage === "CONFIRM_REPS") {
+    box.classList.add("stage-idle");
+    banner.innerText = `✍️ CONFIRMAR SERIE ${currentSet}`;
+    sub.innerText = `Duración real: ${currentWorkSeconds} segundos`;
+    giant.innerText = `${confirmedReps} reps`;
+    secTimer.innerText = "¿Hiciste más o menos repeticiones?";
+    controls.innerHTML = `
+      <div class="quick-row" style="margin-bottom:10px;">
+        <button class="btn-quick" onclick="adjustConfirmedReps(-1)">➖ 1 Rep</button>
+        <button class="btn-quick" onclick="adjustConfirmedReps(1)">➕ 1 Rep</button>
+        <button class="btn-quick" onclick="restartCurrentSetCountdown()">🔄 Repetir</button>
+      </div>
+      <button class="btn-giant btn-blue" onclick="confirmSetAndProceed(false)">
+        😮‍💨 GUARDAR Y PASAR A DESCANSO (${cfg.descansoSerie}s)
+      </button>
+      ${currentSet === 1 ? `
+        <button class="btn-quick" style="width:100%; background:#334155;" onclick="confirmSetAndProceed(true)">
+          🎯 Guardar y calibrar mi ritmo base con esta Serie 1
+        </button>
+      ` : ""}
+    `;
+  }
+  else if (stage === "REST_SET" || stage === "REST_AFTER_SETUP") {
+    box.classList.add("stage-rest");
+    banner.innerText = stage === "REST_SET"
+      ? `😮‍💨 DESCANSO ENTRE SERIES`
+      : `😮‍💨 DESCANSO POST-ARMADO DE PESAS`;
+    sub.innerText = `Siguiente: Serie ${currentSet} de ${ex.series}${partLabel}`;
+    giant.innerText = formatMMSS(restRemainingSeconds);
+    secTimer.innerText = "Respira y recupera";
+    controls.innerHTML = `
+      <div class="quick-row" style="margin-bottom:10px;">
+        <button class="btn-quick" onclick="adjustRestLive(-15)">-15s</button>
+        <button class="btn-quick" onclick="adjustRestLive(15)">+15s</button>
+        <button class="btn-quick" onclick="adjustRestLive(30)">+30s</button>
+      </div>
+      <button class="btn-giant btn-green" onclick="startPrepCountdown()">
+        ⚡ SALTAR DESCANSO E INICIAR SERIE ${currentSet}
+      </button>
+    `;
+  }
+  else if (stage === "SETUP_WEIGHTS") {
+    box.classList.add("stage-setup");
+    banner.innerText = `🔧 CAMBIO DE EJERCICIO: ARMAR PESAS`;
+    sub.innerText = `Prepara: ${ex.peso} para ${ex.nombre}`;
+    giant.innerText = formatMMSS(currentSetupSeconds);
+    secTimer.innerText = `Al terminar de armar tendrás ${cfg.descansoArmado}s de descanso`;
+    controls.innerHTML = `
+      <button class="btn-giant btn-orange" onclick="finishWeightSetup(false)">
+        ✅ PESAS LISTAS ➔ INICIAR DESCANSO (${cfg.descansoArmado}s)
+      </button>
+      <button class="btn-quick" style="width:100%;" onclick="finishWeightSetup(true)">
+        ⚡ Ya estaban listas (Ir directo al ejercicio)
+      </button>
+    `;
+  }
+}
+
+// ============================================================================
+// PRE-ENTRENO Y VITAMINAS
+// ============================================================================
+function tomarPreEntreno() {
+  initAudio();
+  preWorkoutTaken = true;
+  scoopRemaining = Math.max(0, scoopRemaining - 1);
+  localStorage.setItem("gym_scoops_left", String(scoopRemaining));
+  document.getElementById("scoopCountDisplay").innerText = scoopRemaining + " scoops";
+
+  document.getElementById("scoopTimerBox").style.display = "block";
+  startScoopCountdown(15 * 60);
+
+  sendToSheets({
+    accion: "guardar_suplemento",
+    tipo: "Pre-Entreno",
+    detalle: "1 Scoop tomado",
+    scoopsRestantes: scoopRemaining,
+    timerMinutos: 15
+  });
+}
+
+function setScoopMinutes(mins) {
+  startScoopCountdown(mins * 60);
+}
+
+function startScoopCountdown(seconds) {
+  if (scoopInterval) clearInterval(scoopInterval);
+  scoopSecondsLeft = seconds;
+  document.getElementById("scoopTimerVal").innerText = formatMMSS(scoopSecondsLeft);
+
+  scoopInterval = setInterval(() => {
+    scoopSecondsLeft--;
+    document.getElementById("scoopTimerVal").innerText = formatMMSS(Math.max(0, scoopSecondsLeft));
+    if (scoopSecondsLeft <= 0) {
+      clearInterval(scoopInterval);
+      playBeep(880, 0.4, "square");
+      speak("¡Tu pre-entreno ya está activo! Hora de la primera serie.");
+    }
+  }, 1000);
+}
+
+function stopScoopTimer() {
+  if (scoopInterval) clearInterval(scoopInterval);
+  document.getElementById("scoopTimerBox").style.display = "none";
+}
+
+function toggleVitamin(key, label) {
+  const el = document.getElementById("vit-" + key);
+  const active = el.classList.toggle("active");
+  if (active) {
+    sendToSheets({
+      accion: "guardar_suplemento",
+      tipo: "Vitamina / Suplemento",
+      detalle: label,
+      scoopsRestantes: scoopRemaining,
+      timerMinutos: 0
+    });
+  }
+}
+
+// ============================================================================
+// SINCRONIZACIÓN CON GOOGLE SHEETS Y RESUMEN FINAL
+// ============================================================================
+function formatMMSS(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+}
+
+function updateTotalsUI() {
+  document.getElementById("totWorkVal").innerText = formatMMSS(totalWorkSec);
+  document.getElementById("totSetupVal").innerText = formatMMSS(totalSetupSec);
+  document.getElementById("totRestVal").innerText = formatMMSS(totalRestSec);
+}
+
+function sendToSheets(payload) {
+  if (!gasUrl) return;
+  fetch(gasUrl, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  }).catch(() => {});
+}
+
+function syncConfigsFromSheets() {
+  fetch(gasUrl)
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.configs) {
+        savedConfigs = { ...savedConfigs, ...data.configs };
+        localStorage.setItem("gym_configs_v1", JSON.stringify(savedConfigs));
+        renderAll();
+      }
+    })
+    .catch(() => {});
+}
+
+function finishWorkoutSession() {
+  const payload = {
+    accion: "finalizar_rutina",
+    bloque: RUTINA[currentBlockKey].titulo,
+    totalSerieStr: formatMMSS(totalWorkSec),
+    totalArmadoStr: formatMMSS(totalSetupSec),
+    totalDescansoStr: formatMMSS(totalRestSec),
+    preEntrenoTomado: preWorkoutTaken
+  };
+  sendToSheets(payload);
+
+  if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.sendData) {
+    try { window.Telegram.WebApp.sendData(JSON.stringify(payload)); } catch (e) {}
+  }
+  alert(
+    `✅ ¡Entrenamiento guardado!\n\n` +
+    `🟢 Fuerza en serie: ${formatMMSS(totalWorkSec)}\n` +
+    `🟠 Armando pesas: ${formatMMSS(totalSetupSec)}\n` +
+    `🔵 Descanso: ${formatMMSS(totalRestSec)}`
+  );
+}
+
+function openSettings() {
+  document.getElementById("settingsModal").style.display = "flex";
+}
+function closeSettings() {
+  document.getElementById("settingsModal").style.display = "none";
+}
+function saveSettings() {
+  gasUrl = document.getElementById("gasUrlInput").value.trim();
+  scoopRemaining = Number(document.getElementById("scoopTotalInput").value) || 30;
+  localStorage.setItem("gym_gas_url", gasUrl);
+  localStorage.setItem("gym_scoops_left", String(scoopRemaining));
+  document.getElementById("scoopCountDisplay").innerText = scoopRemaining + " scoops";
+  closeSettings();
+  if (gasUrl) syncConfigsFromSheets();
+}
+</script>
+</body>
+</html>
