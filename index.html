@@ -381,7 +381,8 @@ let preWorkoutTaken = false;
 let voiceEnabled = true;
 let audioCtx = null;
 let savedConfigs = JSON.parse(localStorage.getItem("gym_configs_v1") || "{}");
-let gasUrl = localStorage.getItem("gym_gas_url") || "";
+const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbyyJ4q_EDQppABehZt38fo01mFPvSUZ3uij1a2psj0glKQBKXp2UAxwFyZdJLQbzWmzjw/exec";
+let gasUrl = localStorage.getItem("gym_gas_url") || DEFAULT_GAS_URL;
 let scoopRemaining = Number(localStorage.getItem("gym_scoops_left") || 30);
 let scoopInterval = null;
 let scoopSecondsLeft = 15 * 60;
@@ -1278,7 +1279,8 @@ function closeSettings() {
   document.getElementById("settingsModal").style.display = "none";
 }
 function saveSettings() {
-  gasUrl = document.getElementById("gasUrlInput").value.trim();
+  const inputUrl = document.getElementById("gasUrlInput").value.trim();
+  gasUrl = inputUrl || DEFAULT_GAS_URL;
   scoopRemaining = Number(document.getElementById("scoopTotalInput").value) || 30;
   localStorage.setItem("gym_gas_url", gasUrl);
   localStorage.setItem("gym_scoops_left", String(scoopRemaining));
