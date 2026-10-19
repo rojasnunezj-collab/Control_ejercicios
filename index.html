@@ -762,6 +762,7 @@ function confirmSetAndProceed(calibratePace = false) {
   // Enviar registro de la serie a Google Sheets
   sendToSheets({
     accion: "guardar_serie",
+    idEjercicio: ex.id,
     bloque: RUTINA[currentBlockKey].titulo,
     ejercicio: ex.nombre,
     serie: currentSet,
@@ -770,7 +771,10 @@ function confirmSetAndProceed(calibratePace = false) {
     peso: cfg.peso,
     tiempoSerieSeg: currentWorkSeconds,
     tiempoArmadoSeg: lastSetupLoggedSeconds,
-    tiempoDescansoSeg: cfg.descansoSerie
+    tiempoDescansoSeg: cfg.descansoSerie,
+    descansoArmado: cfg.descansoArmado,
+    prepSeg: cfg.prepSeg,
+    segPorRep: cfg.segPorRep
   });
   lastSetupLoggedSeconds = 0;
 
