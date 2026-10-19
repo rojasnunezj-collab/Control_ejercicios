@@ -49,6 +49,54 @@
     .badge.weight { color: var(--orange); border-color: rgba(245,158,11,0.4); }
     .badge.side { color: #c084fc; border-color: rgba(192,132,252,0.4); }
 
+    /* Contenedor de Imagen / GIF del Ejercicio */
+    .ex-media-container {
+      margin: 8px 0 10px;
+      background: #090e17;
+      border-radius: 14px;
+      border: 1px solid var(--card-alt);
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+    .ex-media-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .btn-toggle-media {
+      background: transparent;
+      border: none;
+      color: #38bdf8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 2px 6px;
+    }
+    .ex-media-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-height: 210px;
+      min-height: 120px;
+      background: #020617;
+      position: relative;
+    }
+    .ex-media-wrapper img {
+      max-width: 100%;
+      max-height: 210px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      border-radius: 0 0 12px 12px;
+    }
+    .ex-media-wrapper.collapsed {
+      display: none;
+    }
+
     /* Pantalla Gigante de Estado */
     .stage-box { border-radius: 18px; padding: 18px 14px; text-align: center; margin: 10px 0; transition: all 0.2s; border: 2px solid transparent; }
     .stage-idle { background: rgba(59, 130, 246, 0.12); border-color: var(--blue); }
@@ -159,6 +207,17 @@
       </div>
     </div>
 
+    <!-- DEMOSTRACIÓN VISUAL (IMAGEN / GIF) -->
+    <div class="ex-media-container" id="exMediaContainer">
+      <div class="ex-media-header">
+        <span style="font-size:0.75rem; color:var(--muted); font-weight:700;">🎬 Demostración visual</span>
+        <button class="btn-toggle-media" id="btnToggleMedia" onclick="toggleExerciseMedia()">👁️ Ocultar</button>
+      </div>
+      <div class="ex-media-wrapper" id="exMediaWrapper">
+        <img id="exGifImg" src="" alt="Demostración del ejercicio" loading="lazy" />
+      </div>
+    </div>
+
     <!-- CAJA DINÁMICA DEL ESTADO ACTUAL -->
     <div class="stage-box stage-idle" id="stageBox">
       <div class="set-banner" id="stageBanner">SERIE 1 DE 4</div>
@@ -261,33 +320,33 @@ const RUTINA = {
   b1: {
     titulo: "Lunes y Jueves — Bloque 1: Empuje",
     ejercicios: [
-      { id: "b1_e1", nombre: "Compuesto: Remo vertical agarre abierto + Press militar con barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5 },
-      { id: "b1_e2", nombre: "Press en Puente de Glúteos", peso: "Barra 24 kg / Manc. 14 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10 },
-      { id: "b1_e3", nombre: "Press Hexagonal (Squeeze Press) en Puente de Glúteos", peso: "Mancuernas 14 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10 },
-      { id: "b1_e4", nombre: "Flexiones con Manos en Banco (Pecho Bajo)", peso: "Peso Corporal", series: 4, reps: 12, tipo: "normal", prepDefault: 5 },
-      { id: "b1_e5", nombre: "Extensión de Tríceps tras Nuca / Copa sentado", peso: "Mancuerna 14 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5 },
-      { id: "b1_e6", nombre: "Fondos en Banco", peso: "Peso Corporal", series: 4, reps: 15, tipo: "normal", prepDefault: 5 }
+      { id: "b1_e1", nombre: "Compuesto: Remo vertical agarre abierto + Press militar con barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0028-SGY8Zui.gif" },
+      { id: "b1_e2", nombre: "Press en Puente de Glúteos", peso: "Barra 24 kg / Manc. 14 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0289-SpYC0Kp.gif" },
+      { id: "b1_e3", nombre: "Press Hexagonal (Squeeze Press) en Puente de Glúteos", peso: "Mancuernas 14 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0303-1qrWgZ2.gif" },
+      { id: "b1_e4", nombre: "Flexiones con Manos en Banco (Pecho Bajo)", peso: "Peso Corporal", series: 4, reps: 12, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0493-B1EVP9F.gif" },
+      { id: "b1_e5", nombre: "Extensión de Tríceps tras Nuca / Copa sentado", peso: "Mancuerna 14 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/2188-kont8Ut.gif" },
+      { id: "b1_e6", nombre: "Fondos en Banco", peso: "Peso Corporal", series: 4, reps: 15, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0129-RrLske5.gif" }
     ]
   },
   b2: {
     titulo: "Martes y Viernes — Bloque 2: Tracción y Laterales",
     ejercicios: [
-      { id: "b2_e1", nombre: "Curl de Bíceps con Barra Recta de Pie", peso: "Barra 24 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5 },
-      { id: "b2_e2", nombre: "Curl Inverso con Barra / Press Invertido", peso: "Barra 20 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5 },
-      { id: "b2_e3", nombre: "Curl Concentrado Sentado con Mancuerna", peso: "Mancuerna 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Brazo Izquierdo", "Brazo Derecho"], prepDefault: 5 },
-      { id: "b2_e4", nombre: "Encogimientos de Hombros tras Espalda con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5 },
-      { id: "b2_e5", nombre: "Superserie Hombros: Elevaciones Laterales + Vuelos Posteriores", peso: "Mancuernas 7 kg", series: 4, reps: 12, tipo: "superserie", partes: ["1/2: Elevaciones Laterales (7 kg)", "2/2: Vuelos Posteriores Inclinados (7 kg)"], prepDefault: 5 }
+      { id: "b2_e1", nombre: "Curl de Bíceps con Barra Recta de Pie", peso: "Barra 24 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0031-25GPyDY.gif" },
+      { id: "b2_e2", nombre: "Curl Inverso con Barra / Press Invertido", peso: "Barra 20 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0080-xNrS20v.gif" },
+      { id: "b2_e3", nombre: "Curl Concentrado Sentado con Mancuerna", peso: "Mancuerna 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Brazo Izquierdo", "Brazo Derecho"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0297-gvsWLQw.gif" },
+      { id: "b2_e4", nombre: "Encogimientos de Hombros tras Espalda con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0095-dG7tG5y.gif" },
+      { id: "b2_e5", nombre: "Superserie Hombros: Elevaciones Laterales + Vuelos Posteriores", peso: "Mancuernas 7 kg", series: 4, reps: 12, tipo: "superserie", partes: ["1/2: Elevaciones Laterales (7 kg)", "2/2: Vuelos Posteriores Inclinados (7 kg)"], prepDefault: 5, gifs: ["https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0334-DsgkuIt.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/2292-mu5Guxt.gif"] }
     ]
   },
   b3: {
     titulo: "Miércoles y Sábado — Bloque 3: Piernas, Oblicuos y Potencia",
     ejercicios: [
-      { id: "b3_e1", nombre: "Compuesto Funcional: Cargada/Curl Neutro + Press Unilateral", peso: "Mancuerna 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5 },
-      { id: "b3_e2", nombre: "Sentadilla con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10 },
-      { id: "b3_e3", nombre: "Zancadas hacia adelante con Mancuernas", peso: "Mancuernas 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Pierna Izquierda", "Pierna Derecha"], prepDefault: 5 },
-      { id: "b3_e4", nombre: "Elevaciones de Pantorrilla con Barra", peso: "Barra 24 kg", series: 4, reps: 20, tipo: "normal", prepDefault: 5 },
-      { id: "b3_e5", nombre: "Leñador Diagonal (Woodchopper) con Mancuerna", peso: "Mancuerna 14 kg", series: 4, reps: 12, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5 },
-      { id: "b3_e6", nombre: "Superserie Oblicuos: Giros Rusos + Plancha Lateral", peso: "Mancuerna 14 kg / Corporal", series: 4, reps: 16, tipo: "oblicuos_especial", partes: ["1/3: Giros Rusos (16 reps)", "2/3: Plancha Lateral Izq (12 reps)", "3/3: Plancha Lateral Der (12 reps)"], prepDefault: 5 }
+      { id: "b3_e1", nombre: "Compuesto Funcional: Cargada/Curl Neutro + Press Unilateral", peso: "Mancuerna 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/1700-FS63wTN.gif" },
+      { id: "b3_e2", nombre: "Sentadilla con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0043-qXTaZnJ.gif" },
+      { id: "b3_e3", nombre: "Zancadas hacia adelante con Mancuernas", peso: "Mancuernas 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Pierna Izquierda", "Pierna Derecha"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0336-RRWFUcw.gif" },
+      { id: "b3_e4", nombre: "Elevaciones de Pantorrilla con Barra", peso: "Barra 24 kg", series: 4, reps: 20, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/1372-8ozhUIZ.gif" },
+      { id: "b3_e5", nombre: "Leñador Diagonal (Woodchopper) con Mancuerna", peso: "Mancuerna 14 kg", series: 4, reps: 12, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/cable-twist-up-down.gif" },
+      { id: "b3_e6", nombre: "Superserie Oblicuos: Giros Rusos + Plancha Lateral", peso: "Mancuerna 14 kg / Corporal", series: 4, reps: 16, tipo: "oblicuos_especial", partes: ["1/3: Giros Rusos (16 reps)", "2/3: Plancha Lateral Izq (12 reps)", "3/3: Plancha Lateral Der (12 reps)"], prepDefault: 5, gifs: ["https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0687-XVDdcoj.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/3544-5VXmnV5.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/3544-5VXmnV5.gif"] }
     ]
   }
 };
@@ -345,7 +404,29 @@ window.addEventListener("DOMContentLoaded", () => {
   else selectBlock("b1");
 
   if (gasUrl) syncConfigsFromSheets();
+  updateMediaVisibilityUI();
 });
+
+let showExerciseMedia = localStorage.getItem("gym_show_media") !== "false";
+
+function toggleExerciseMedia() {
+  showExerciseMedia = !showExerciseMedia;
+  localStorage.setItem("gym_show_media", String(showExerciseMedia));
+  updateMediaVisibilityUI();
+}
+
+function updateMediaVisibilityUI() {
+  const wrapper = document.getElementById("exMediaWrapper");
+  const btn = document.getElementById("btnToggleMedia");
+  if (!wrapper || !btn) return;
+  if (showExerciseMedia) {
+    wrapper.classList.remove("collapsed");
+    btn.innerText = "👁️ Ocultar";
+  } else {
+    wrapper.classList.add("collapsed");
+    btn.innerText = "👁️ Ver GIF";
+  }
+}
 
 async function requestWakeLock() {
   try {
@@ -829,6 +910,28 @@ function renderAll() {
     sideBadge.innerText = "👉 " + viewedEx.partes[prog.currentPartIdx];
   } else {
     sideBadge.style.display = "none";
+  }
+
+  // Actualizar demostración visual (GIF / Imagen)
+  const mediaContainer = document.getElementById("exMediaContainer");
+  const gifImg = document.getElementById("exGifImg");
+  if (mediaContainer && gifImg) {
+    let gifUrl = viewedEx.gif || "";
+    if (viewedEx.gifs && Array.isArray(viewedEx.gifs)) {
+      const gIdx = Math.min(prog.currentPartIdx, viewedEx.gifs.length - 1);
+      gifUrl = viewedEx.gifs[gIdx] || viewedEx.gif || "";
+    }
+    const customGif = (savedConfigs[viewedEx.id] && savedConfigs[viewedEx.id].gif);
+    if (customGif) gifUrl = customGif;
+
+    if (gifUrl) {
+      mediaContainer.style.display = "block";
+      if (gifImg.src !== gifUrl) {
+        gifImg.src = gifUrl;
+      }
+    } else {
+      mediaContainer.style.display = "none";
+    }
   }
 
   renderExerciseConfigButtons();
