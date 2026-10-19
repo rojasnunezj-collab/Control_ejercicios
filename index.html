@@ -297,7 +297,9 @@ const FATIGUE_FACTORS = [1.0, 1.08, 1.15, 1.22];
 
 // Estado Global
 let currentBlockKey = "b1";
-let currentExIdx = 0;
+let currentExIdx = 0;      // Ejercicio que se está visualizando en pantalla
+let activeExIdx = 0;       // Ejercicio que se está ejecutando activamente
+let exerciseProgress = {}; // Progreso guardado por ejercicio: { [exId]: { currentSet, currentPartIdx } }
 let currentSet = 1;
 let currentPartIdx = 0;
 let stage = "IDLE"; // IDLE, PREP, WORK, CONFIRM_REPS, REST_SET, SETUP_WEIGHTS, REST_AFTER_SETUP
@@ -439,22 +441,43 @@ function adjustPace(delta) {
 // ============================================================================
 // LÓGICA DE NAVEGACIÓN Y PARTES DEL EJERCICIO
 // ============================================================================
-function getCurrentEx() {
+function getActiveEx() {
+  return RUTINA[currentBlockKey].ejercicios[activeExIdx];
+}
+
+function getViewedEx() {
   return RUTINA[currentBlockKey].ejercicios[currentExIdx];
 }
 
-function getTargetRepsForCurrentPart(ex) {
+function getCurrentEx() {
+  return (stage !== "IDLE" && currentExIdx !== activeExIdx) ? getActiveEx() : getViewedEx();
+}
+
+function getExProgress(ex) {
+  if (!ex) return { currentSet: 1, currentPartIdx: 0 };
+  if (!exerciseProgress[ex.id]) {
+    exerciseProgress[ex.id] = { currentSet: 1, currentPartIdx: 0 };
+  }
+  return exerciseProgress[ex.id];
+}
+
+function saveExProgress(ex, set, partIdx) {
+  if (!ex) return;
+  exerciseProgress[ex.id] = { currentSet: set, currentPartIdx: partIdx };
+}
+
+function getTargetRepsForCurrentPart(ex, partIdx = currentPartIdx) {
   if (ex.tipo === "oblicuos_especial") {
-    return currentPartIdx === 0 ? 16 : 12;
+    return partIdx === 0 ? 16 : 12;
   }
   return ex.reps;
 }
 
-function getTotalPartsForCurrentSet(ex) {
+function getTotalPartsForCurrentSet(ex, set = currentSet) {
   if (ex.tipo === "unilateral" || ex.tipo === "superserie") return 2;
   if (ex.tipo === "oblicuos_especial") {
     // En la serie 4 solo se hacen Giros Rusos (1 parte)
-    return currentSet <= 3 ? 3 : 1;
+    return set <= 3 ? 3 : 1;
   }
   return 1;
 }
@@ -463,6 +486,8 @@ function selectBlock(blockKey) {
   clearTimers();
   currentBlockKey = blockKey;
   currentExIdx = 0;
+  activeExIdx = 0;
+  exerciseProgress = {};
   currentSet = 1;
   currentPartIdx = 0;
   stage = "IDLE";
@@ -474,11 +499,16 @@ function selectBlock(blockKey) {
 
 function prevExercise() {
   if (currentExIdx > 0) {
-    clearTimers();
-    currentExIdx--;
-    currentSet = 1;
-    currentPartIdx = 0;
-    stage = "IDLE";
+    if (stage === "IDLE") {
+      saveExProgress(getViewedEx(), currentSet, currentPartIdx);
+      currentExIdx--;
+      activeExIdx = currentExIdx;
+      const prog = getExProgress(getViewedEx());
+      currentSet = prog.currentSet;
+      currentPartIdx = prog.currentPartIdx;
+    } else {
+      currentExIdx--;
+    }
     renderAll();
   }
 }
@@ -486,13 +516,34 @@ function prevExercise() {
 function nextExercise() {
   const list = RUTINA[currentBlockKey].ejercicios;
   if (currentExIdx < list.length - 1) {
-    clearTimers();
-    currentExIdx++;
-    currentSet = 1;
-    currentPartIdx = 0;
-    stage = "IDLE";
+    if (stage === "IDLE") {
+      saveExProgress(getViewedEx(), currentSet, currentPartIdx);
+      currentExIdx++;
+      activeExIdx = currentExIdx;
+      const prog = getExProgress(getViewedEx());
+      currentSet = prog.currentSet;
+      currentPartIdx = prog.currentPartIdx;
+    } else {
+      currentExIdx++;
+    }
     renderAll();
   }
+}
+
+function returnToActiveExercise() {
+  currentExIdx = activeExIdx;
+  renderAll();
+}
+
+function switchToViewedExercise() {
+  if (!confirm("¿Deseas cancelar el ejercicio actual e iniciar este ejercicio?")) return;
+  clearTimers();
+  activeExIdx = currentExIdx;
+  const prog = getExProgress(getViewedEx());
+  currentSet = prog.currentSet;
+  currentPartIdx = prog.currentPartIdx;
+  stage = "IDLE";
+  renderAll();
 }
 
 // ============================================================================
@@ -509,7 +560,8 @@ function clearTimers() {
 function startPrepCountdown(extraSeconds = 0) {
   initAudio();
   clearTimers();
-  const ex = getCurrentEx();
+  currentExIdx = activeExIdx;
+  const ex = getActiveEx();
   const cfg = getExConfig(ex);
   stage = "PREP";
   prepRemainingSeconds = (extraSeconds > 0) ? extraSeconds : cfg.prepSeg;
@@ -526,6 +578,8 @@ function startPrepCountdown(extraSeconds = 0) {
     renderStageBox();
     if (prepRemainingSeconds <= 0) {
       clearTimers();
+      currentExIdx = activeExIdx;
+      renderAll();
       startActiveWorkSet();
     }
   }, 1000);
@@ -541,13 +595,14 @@ function addPrepTime(sec) {
 // 2. En Serie (Marcapasos con Compensación de Fatiga + Reloj de Esfuerzo)
 function startActiveWorkSet() {
   clearTimers();
+  currentExIdx = activeExIdx;
   stage = "WORK";
   currentRepCount = 0;
   currentWorkSeconds = 0;
 
-  const ex = getCurrentEx();
+  const ex = getActiveEx();
   const cfg = getExConfig(ex);
-  const targetReps = getTargetRepsForCurrentPart(ex);
+  const targetReps = getTargetRepsForCurrentPart(ex, currentPartIdx);
   const fatigueMultiplier = FATIGUE_FACTORS[Math.min(currentSet - 1, FATIGUE_FACTORS.length - 1)];
   const effectiveSecPerRep = Number((cfg.segPorRep * fatigueMultiplier).toFixed(2));
 
@@ -586,6 +641,7 @@ function startActiveWorkSet() {
 
 // ¡SOLUCIÓN CLAVE!: Reiniciar el conteo de la serie si aún no habías empezado
 function restartCurrentSetCountdown() {
+  currentExIdx = activeExIdx;
   // Restamos los segundos que habían corrido de esta serie abortada
   totalWorkSec = Math.max(0, totalWorkSec - currentWorkSeconds);
   currentWorkSeconds = 0;
@@ -597,8 +653,9 @@ function restartCurrentSetCountdown() {
 // 3. Terminar Serie -> Confirmar Reps (y autocalibrar en Serie 1 si desea)
 function finishWorkSet() {
   clearTimers();
-  const ex = getCurrentEx();
-  confirmedReps = getTargetRepsForCurrentPart(ex);
+  currentExIdx = activeExIdx;
+  const ex = getActiveEx();
+  confirmedReps = getTargetRepsForCurrentPart(ex, currentPartIdx);
   stage = "CONFIRM_REPS";
   playBeep(750, 0.18);
   renderAll();
@@ -610,7 +667,7 @@ function adjustConfirmedReps(delta) {
 }
 
 function confirmSetAndProceed(calibratePace = false) {
-  const ex = getCurrentEx();
+  const ex = getActiveEx();
   const cfg = getExConfig(ex);
 
   if (calibratePace && confirmedReps > 0 && currentWorkSeconds >= 5) {
@@ -618,7 +675,7 @@ function confirmSetAndProceed(calibratePace = false) {
     updateExConfig("segPorRep", cfg.segPorRep);
   }
 
-  const totalParts = getTotalPartsForCurrentSet(ex);
+  const totalParts = getTotalPartsForCurrentSet(ex, currentSet);
   const ladoNombre = ex.partes ? ex.partes[currentPartIdx] : "Completo";
 
   // Enviar registro de la serie a Google Sheets
@@ -639,6 +696,8 @@ function confirmSetAndProceed(calibratePace = false) {
   // ¿Falta el otro brazo/pierna o la segunda parte de la superserie?
   if (currentPartIdx + 1 < totalParts) {
     currentPartIdx++;
+    saveExProgress(ex, currentSet, currentPartIdx);
+    currentExIdx = activeExIdx;
     // Pequeña preparación de cambio de mano/ejercicio sin meter descanso largo
     startPrepCountdown(8);
     return;
@@ -650,18 +709,24 @@ function confirmSetAndProceed(calibratePace = false) {
   if (currentSet < ex.series) {
     // Pasa al descanso normal entre series
     currentSet++;
+    saveExProgress(ex, currentSet, currentPartIdx);
+    currentExIdx = activeExIdx;
     startRestTimer("REST_SET", cfg.descansoSerie);
   } else {
     // ¡Terminó todas las series de este ejercicio!
+    saveExProgress(ex, currentSet, currentPartIdx);
     const list = RUTINA[currentBlockKey].ejercicios;
-    if (currentExIdx < list.length - 1) {
+    if (activeExIdx < list.length - 1) {
       // Pasa a FASE DE ARMADO DE PESAS para el siguiente ejercicio
-      currentExIdx++;
-      currentSet = 1;
-      currentPartIdx = 0;
+      activeExIdx++;
+      currentExIdx = activeExIdx;
+      const prog = getExProgress(getActiveEx());
+      currentSet = prog.currentSet;
+      currentPartIdx = prog.currentPartIdx;
       startWeightSetupPhase();
     } else {
       stage = "IDLE";
+      currentExIdx = activeExIdx;
       speak("¡Felicidades! Terminaste todo el bloque de hoy.");
       alert("🎉 ¡Bloque completado! Toca 'Finalizar Entrenamiento' abajo para guardar tu resumen.");
       renderAll();
@@ -672,6 +737,7 @@ function confirmSetAndProceed(calibratePace = false) {
 // 4. Descanso entre Series (o Descanso Post-Armado)
 function startRestTimer(restType, seconds) {
   clearTimers();
+  currentExIdx = activeExIdx;
   stage = restType; // "REST_SET" o "REST_AFTER_SETUP"
   restRemainingSeconds = seconds;
   renderAll();
@@ -691,6 +757,7 @@ function startRestTimer(restType, seconds) {
       playBeep(920, 0.35, "square");
       speak("¡Tiempo! Listo para la serie " + currentSet);
       stage = "IDLE";
+      currentExIdx = activeExIdx;
       renderAll();
     }
   }, 1000);
@@ -704,9 +771,10 @@ function adjustRestLive(delta) {
 // 5. Fase de Armado / Cambio de Discos entre Ejercicio y Ejercicio
 function startWeightSetupPhase() {
   clearTimers();
+  currentExIdx = activeExIdx;
   stage = "SETUP_WEIGHTS";
   currentSetupSeconds = 0;
-  const nextEx = getCurrentEx();
+  const nextEx = getActiveEx();
   speak("Cambio de ejercicio. Armar " + nextEx.peso);
   renderAll();
 
@@ -721,8 +789,9 @@ function startWeightSetupPhase() {
 // Al terminar de armar las pesas -> Entra el Descanso entre Ejercicio y Ejercicio
 function finishWeightSetup(skipRest = false) {
   clearTimers();
+  currentExIdx = activeExIdx;
   lastSetupLoggedSeconds = currentSetupSeconds;
-  const ex = getCurrentEx();
+  const ex = getActiveEx();
   const cfg = getExConfig(ex);
 
   if (skipRest) {
@@ -739,18 +808,25 @@ function finishWeightSetup(skipRest = false) {
 // ============================================================================
 function renderAll() {
   const list = RUTINA[currentBlockKey].ejercicios;
-  const ex = getCurrentEx();
-  const cfg = getExConfig(ex);
+  const viewedEx = getViewedEx();
+  const cfg = getExConfig(viewedEx);
+  const prog = (currentExIdx === activeExIdx)
+    ? { currentSet, currentPartIdx }
+    : getExProgress(viewedEx);
 
-  document.getElementById("exProgressText").innerText = `EJERCICIO ${currentExIdx + 1} DE ${list.length}`;
-  document.getElementById("exNameText").innerText = ex.nombre;
+  const isReviewing = (stage !== "IDLE" && currentExIdx !== activeExIdx);
+  document.getElementById("exProgressText").innerText =
+    `EJERCICIO ${currentExIdx + 1} DE ${list.length}${isReviewing ? " (CONSULTA)" : ""}`;
+  document.getElementById("exNameText").innerText = viewedEx.nombre;
   document.getElementById("exWeightBadge").innerText = "🏋️ " + cfg.peso;
-  document.getElementById("exTargetBadge").innerText = `🎯 ${ex.series} series x ${ex.reps} reps`;
+  document.getElementById("exTargetBadge").innerText =
+    `🎯 ${viewedEx.series} series x ${getTargetRepsForCurrentPart(viewedEx, prog.currentPartIdx)} reps`;
 
+  const totalParts = getTotalPartsForCurrentSet(viewedEx, prog.currentSet);
   const sideBadge = document.getElementById("exSideBadge");
-  if (ex.partes && getTotalPartsForCurrentSet(ex) > 1) {
+  if (viewedEx.partes && totalParts > 1) {
     sideBadge.style.display = "inline-block";
-    sideBadge.innerText = "👉 " + ex.partes[currentPartIdx];
+    sideBadge.innerText = "👉 " + viewedEx.partes[prog.currentPartIdx];
   } else {
     sideBadge.style.display = "none";
   }
@@ -760,7 +836,7 @@ function renderAll() {
 }
 
 function renderExerciseConfigButtons() {
-  const cfg = getExConfig(getCurrentEx());
+  const cfg = getExConfig(getViewedEx());
   document.getElementById("paceLabel").innerText = cfg.segPorRep + "s/rep";
 
   Array.from(document.getElementById("restSetGroup").children).forEach(btn => {
@@ -775,8 +851,6 @@ function renderExerciseConfigButtons() {
 }
 
 function renderStageBox() {
-  const ex = getCurrentEx();
-  const cfg = getExConfig(ex);
   const box = document.getElementById("stageBox");
   const banner = document.getElementById("stageBanner");
   const sub = document.getElementById("stageSubBanner");
@@ -784,10 +858,63 @@ function renderStageBox() {
   const secTimer = document.getElementById("secondaryTimer");
   const controls = document.getElementById("dynamicControls");
 
-  const targetReps = getTargetRepsForCurrentPart(ex);
-  const partLabel = (ex.partes && getTotalPartsForCurrentSet(ex) > 1) ? ` (${ex.partes[currentPartIdx]})` : "";
-
   box.className = "stage-box";
+  giant.style.fontSize = "";
+  giant.style.color = "";
+
+  // SI EL USUARIO ESTÁ REVISANDO OTRO EJERCICIO MIENTRAS HAY UN ENTRENAMIENTO/DESCANSO ACTIVO
+  if (stage !== "IDLE" && currentExIdx !== activeExIdx) {
+    box.classList.add("stage-idle");
+    const activeEx = getActiveEx();
+    const activeTotalParts = getTotalPartsForCurrentSet(activeEx, currentSet);
+    const activePartLabel = (activeEx.partes && activeTotalParts > 1)
+      ? ` (${activeEx.partes[currentPartIdx]})`
+      : "";
+
+    let statusVal = "";
+    let statusSub = "";
+
+    if (stage === "REST_SET" || stage === "REST_AFTER_SETUP") {
+      statusVal = formatMMSS(restRemainingSeconds);
+      statusSub = `Descansando en: ${activeEx.nombre} (Serie ${currentSet}${activePartLabel})`;
+    } else if (stage === "PREP") {
+      statusVal = prepRemainingSeconds + "s";
+      statusSub = `Preparando: ${activeEx.nombre} (Serie ${currentSet}${activePartLabel})`;
+    } else if (stage === "WORK") {
+      statusVal = `${currentRepCount} reps (${formatMMSS(currentWorkSeconds)})`;
+      statusSub = `En serie: ${activeEx.nombre} (Serie ${currentSet}${activePartLabel})`;
+    } else if (stage === "SETUP_WEIGHTS") {
+      statusVal = formatMMSS(currentSetupSeconds);
+      statusSub = `Armando pesas para: ${activeEx.nombre}`;
+    } else if (stage === "CONFIRM_REPS") {
+      statusVal = `${confirmedReps} reps`;
+      statusSub = `Confirmar en: ${activeEx.nombre} (Serie ${currentSet}${activePartLabel})`;
+    }
+
+    banner.innerText = "👀 MODO REVISIÓN (CONSULTA)";
+    sub.innerText = statusSub;
+    giant.innerText = statusVal;
+    giant.style.fontSize = "3.2rem";
+    giant.style.color = "#38bdf8";
+    secTimer.innerText = "El cronómetro no se detiene. Puedes consultar este ejercicio con tranquilidad.";
+
+    controls.innerHTML = `
+      <button class="btn-giant btn-blue" onclick="returnToActiveExercise()">
+        🔙 VOLVER A MI EJERCICIO ACTIVO (${activeExIdx + 1})
+      </button>
+      <button class="btn-quick" style="width:100%; margin-top:6px;" onclick="switchToViewedExercise()">
+        ⚡ Empezar a entrenar este ejercicio ahora
+      </button>
+    `;
+    return;
+  }
+
+  // EJERCICIO ACTIVO NORMAL
+  const ex = getActiveEx();
+  const cfg = getExConfig(ex);
+  const targetReps = getTargetRepsForCurrentPart(ex, currentPartIdx);
+  const totalParts = getTotalPartsForCurrentSet(ex, currentSet);
+  const partLabel = (ex.partes && totalParts > 1) ? ` (${ex.partes[currentPartIdx]})` : "";
 
   if (stage === "IDLE") {
     box.classList.add("stage-idle");
