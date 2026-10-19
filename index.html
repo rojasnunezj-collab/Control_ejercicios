@@ -973,6 +973,7 @@ function sendToSheets(payload) {
   fetch(gasUrl, {
     method: "POST",
     mode: "no-cors",
+    keepalive: true,
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(payload)
   }).catch(() => {});
@@ -991,6 +992,17 @@ function syncConfigsFromSheets() {
     .catch(() => {});
 }
 
+function closeMiniApp() {
+  if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.close === "function") {
+    try {
+      window.Telegram.WebApp.close();
+    } catch (e) {}
+  }
+  try {
+    window.close();
+  } catch (e) {}
+}
+
 function finishWorkoutSession() {
   const payload = {
     accion: "finalizar_rutina",
@@ -1005,12 +1017,24 @@ function finishWorkoutSession() {
   if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.sendData) {
     try { window.Telegram.WebApp.sendData(JSON.stringify(payload)); } catch (e) {}
   }
-  alert(
+
+  const summary =
     `✅ ¡Entrenamiento guardado!\n\n` +
     `🟢 Fuerza en serie: ${formatMMSS(totalWorkSec)}\n` +
     `🟠 Armando pesas: ${formatMMSS(totalSetupSec)}\n` +
-    `🔵 Descanso: ${formatMMSS(totalRestSec)}`
-  );
+    `🔵 Descanso: ${formatMMSS(totalRestSec)}`;
+
+  if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.showAlert === "function") {
+    try {
+      window.Telegram.WebApp.showAlert(summary, () => {
+        closeMiniApp();
+      });
+      return;
+    } catch (e) {}
+  }
+
+  alert(summary);
+  closeMiniApp();
 }
 
 function openSettings() {
