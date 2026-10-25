@@ -18,7 +18,7 @@ const CATALOGO_RUTINA = [
   // Bloque 1: Empuje (Lunes y Jueves)
   { id: "b1_e1", nombre: "Compuesto: Remo vertical agarre abierto + Press militar con barra", peso: "Barra 24 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b1_e2", nombre: "Press en Puente de Glúteos", peso: "Barra 24 kg / Manc. 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
-  { id: "b1_e3", nombre: "Press Hexagonal (Squeeze Press) en Puente de Glúteos", peso: "Mancuernas 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
+  { id: "b1_e3", nombre: "Press Hexagonal (Squeeze Press) en Puente de Glúteos", peso: "2 Mancuernas de 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
   { id: "b1_e4", nombre: "Flexiones con Manos en Banco (Pecho Bajo)", peso: "Peso Corporal", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b1_e5", nombre: "Extensión de Tríceps tras Nuca / Copa sentado", peso: "Mancuerna 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b1_e6", nombre: "Fondos en Banco", peso: "Peso Corporal", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
@@ -33,7 +33,7 @@ const CATALOGO_RUTINA = [
   // Bloque 3: Piernas, Oblicuos y Potencia (Miércoles y Sábado)
   { id: "b3_e1", nombre: "Compuesto Funcional: Cargada/Curl Neutro + Press Unilateral", peso: "Mancuerna 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b3_e2", nombre: "Sentadilla con Barra", peso: "Barra 24 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
-  { id: "b3_e3", nombre: "Zancadas hacia adelante con Mancuernas", peso: "Mancuernas 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
+  { id: "b3_e3", nombre: "Zancadas hacia adelante con Mancuernas", peso: "2 Mancuernas de 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b3_e4", nombre: "Elevaciones de Pantorrilla con Barra", peso: "Barra 24 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b3_e5", nombre: "Leñador Diagonal (Woodchopper) con Mancuerna", peso: "Mancuerna 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b3_e6", nombre: "Superserie Oblicuos: Giros Rusos + Plancha Lateral", peso: "Mancuerna 14 kg / Corporal", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 }

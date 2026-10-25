@@ -325,7 +325,7 @@ const RUTINA = {
     ejercicios: [
       { id: "b1_e1", nombre: "Compuesto: Remo vertical agarre abierto + Press militar con barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0028-SGY8Zui.gif" },
       { id: "b1_e2", nombre: "Press en Puente de Glúteos", peso: "Barra 24 kg / Manc. 14 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0289-SpYC0Kp.gif" },
-      { id: "b1_e3", nombre: "Press Hexagonal (Squeeze Press) en Puente de Glúteos", peso: "Mancuernas 14 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0303-1qrWgZ2.gif" },
+      { id: "b1_e3", nombre: "Press Hexagonal (Squeeze Press) en Puente de Glúteos", peso: "2 Mancuernas de 7 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0303-1qrWgZ2.gif" },
       { id: "b1_e4", nombre: "Flexiones con Manos en Banco (Pecho Bajo)", peso: "Peso Corporal", series: 4, reps: 12, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0493-B1EVP9F.gif" },
       { id: "b1_e5", nombre: "Extensión de Tríceps tras Nuca / Copa sentado", peso: "Mancuerna 14 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/2188-kont8Ut.gif" },
       { id: "b1_e6", nombre: "Fondos en Banco", peso: "Peso Corporal", series: 4, reps: 15, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0129-RrLske5.gif" }
@@ -346,7 +346,7 @@ const RUTINA = {
     ejercicios: [
       { id: "b3_e1", nombre: "Compuesto Funcional: Cargada/Curl Neutro + Press Unilateral", peso: "Mancuerna 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/1700-FS63wTN.gif" },
       { id: "b3_e2", nombre: "Sentadilla con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0043-qXTaZnJ.gif" },
-      { id: "b3_e3", nombre: "Zancadas hacia adelante con Mancuernas", peso: "Mancuernas 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Pierna Izquierda", "Pierna Derecha"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0336-RRWFUcw.gif" },
+      { id: "b3_e3", nombre: "Zancadas hacia adelante con Mancuernas", peso: "2 Mancuernas de 7 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Pierna Izquierda", "Pierna Derecha"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0336-RRWFUcw.gif" },
       { id: "b3_e4", nombre: "Elevaciones de Pantorrilla con Barra", peso: "Barra 24 kg", series: 4, reps: 20, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/1372-8ozhUIZ.gif" },
       { id: "b3_e5", nombre: "Leñador Diagonal (Woodchopper) con Mancuerna", peso: "Mancuerna 14 kg", series: 4, reps: 12, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/cable-twist-up-down.gif" },
       { id: "b3_e6", nombre: "Superserie Oblicuos: Giros Rusos + Plancha Lateral", peso: "Mancuerna 14 kg / Corporal", series: 4, reps: 16, tipo: "oblicuos_especial", partes: ["1/3: Giros Rusos (16 reps)", "2/3: Plancha Lateral Izq (12 reps)", "3/3: Plancha Lateral Der (12 reps)"], prepDefault: 5, gifs: ["https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0687-XVDdcoj.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/3544-5VXmnV5.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/3544-5VXmnV5.gif"] }
@@ -409,6 +409,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
   if (gasUrl) syncConfigsFromSheets();
   updateMediaVisibilityUI();
+  restoreScoopTimerIfActive();
+  syncRestTimerIfActive();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    restoreScoopTimerIfActive();
+    syncRestTimerIfActive();
+  }
+});
+window.addEventListener("focus", () => {
+  restoreScoopTimerIfActive();
+  syncRestTimerIfActive();
 });
 
 let showExerciseMedia = localStorage.getItem("gym_show_media") !== "false";
@@ -639,6 +652,7 @@ function clearTimers() {
   if (repTimeout) clearTimeout(repTimeout);
   timerInterval = null;
   repTimeout = null;
+  localStorage.removeItem("gym_rest_target_time");
 }
 
 // 1. Iniciar Preparación (con opción de reiniciar si no estabas listo)
@@ -829,10 +843,14 @@ function startRestTimer(restType, seconds) {
   currentExIdx = activeExIdx;
   stage = restType; // "REST_SET" o "REST_AFTER_SETUP"
   restRemainingSeconds = seconds;
+  const targetEndTime = Date.now() + seconds * 1000;
+  localStorage.setItem("gym_rest_target_time", String(targetEndTime));
   renderAll();
 
   timerInterval = setInterval(() => {
-    restRemainingSeconds--;
+    const now = Date.now();
+    const remaining = Math.max(0, Math.ceil((targetEndTime - now) / 1000));
+    restRemainingSeconds = remaining;
     totalRestSec++;
     updateTotalsUI();
 
@@ -849,12 +867,35 @@ function startRestTimer(restType, seconds) {
       currentExIdx = activeExIdx;
       renderAll();
     }
-  }, 1000);
+  }, 500);
 }
 
 function adjustRestLive(delta) {
-  restRemainingSeconds = Math.max(0, restRemainingSeconds + delta);
+  const currentTarget = Number(localStorage.getItem("gym_rest_target_time") || (Date.now() + restRemainingSeconds * 1000));
+  const newTarget = currentTarget + delta * 1000;
+  localStorage.setItem("gym_rest_target_time", String(newTarget));
+  restRemainingSeconds = Math.max(0, Math.ceil((newTarget - Date.now()) / 1000));
   renderStageBox();
+}
+
+function syncRestTimerIfActive() {
+  if (stage === "REST_SET" || stage === "REST_AFTER_SETUP") {
+    const target = Number(localStorage.getItem("gym_rest_target_time") || 0);
+    if (!target) return;
+    const now = Date.now();
+    const remaining = Math.max(0, Math.ceil((target - now) / 1000));
+    restRemainingSeconds = remaining;
+    if (remaining <= 0) {
+      clearTimers();
+      playBeep(920, 0.35, "square");
+      speak("¡Tiempo! Listo para la serie " + currentSet);
+      stage = "IDLE";
+      currentExIdx = activeExIdx;
+      renderAll();
+    } else {
+      renderStageBox();
+    }
+  }
 }
 
 // 5. Fase de Armado / Cambio de Discos entre Ejercicio y Ejercicio
@@ -1156,24 +1197,61 @@ function setScoopMinutes(mins) {
   startScoopCountdown(mins * 60);
 }
 
-function startScoopCountdown(seconds) {
+function startScoopCountdown(seconds, existingEndTime = null) {
   if (scoopInterval) clearInterval(scoopInterval);
-  scoopSecondsLeft = seconds;
-  document.getElementById("scoopTimerVal").innerText = formatMMSS(scoopSecondsLeft);
+  const targetEndTime = existingEndTime || (Date.now() + seconds * 1000);
+  localStorage.setItem("gym_scoop_target_time", String(targetEndTime));
+  localStorage.setItem("gym_scoop_active", "true");
 
-  scoopInterval = setInterval(() => {
-    scoopSecondsLeft--;
-    document.getElementById("scoopTimerVal").innerText = formatMMSS(Math.max(0, scoopSecondsLeft));
+  function tick() {
+    const now = Date.now();
+    scoopSecondsLeft = Math.max(0, Math.ceil((targetEndTime - now) / 1000));
+    const valEl = document.getElementById("scoopTimerVal");
+    if (valEl) valEl.innerText = formatMMSS(scoopSecondsLeft);
     if (scoopSecondsLeft <= 0) {
       clearInterval(scoopInterval);
+      scoopInterval = null;
+      localStorage.removeItem("gym_scoop_target_time");
+      localStorage.setItem("gym_scoop_active", "false");
       playBeep(880, 0.4, "square");
       speak("¡Tu pre-entreno ya está activo! Hora de la primera serie.");
     }
-  }, 1000);
+  }
+
+  tick();
+  scoopInterval = setInterval(tick, 500);
+}
+
+function restoreScoopTimerIfActive() {
+  const targetEndTime = Number(localStorage.getItem("gym_scoop_target_time") || 0);
+  const isActive = localStorage.getItem("gym_scoop_active") === "true";
+  if (!isActive || !targetEndTime) return;
+
+  const now = Date.now();
+  const diffSec = Math.ceil((targetEndTime - now) / 1000);
+  const scoopBox = document.getElementById("scoopTimerBox");
+  if (scoopBox) scoopBox.style.display = "block";
+
+  if (diffSec > 0) {
+    startScoopCountdown(diffSec, targetEndTime);
+  } else {
+    if (scoopInterval) clearInterval(scoopInterval);
+    scoopInterval = null;
+    scoopSecondsLeft = 0;
+    const valEl = document.getElementById("scoopTimerVal");
+    if (valEl) valEl.innerText = "00:00";
+    localStorage.removeItem("gym_scoop_target_time");
+    localStorage.setItem("gym_scoop_active", "false");
+    playBeep(880, 0.4, "square");
+    speak("¡Tu pre-entreno ya está activo! Hora de la primera serie.");
+  }
 }
 
 function stopScoopTimer() {
   if (scoopInterval) clearInterval(scoopInterval);
+  scoopInterval = null;
+  localStorage.removeItem("gym_scoop_target_time");
+  localStorage.setItem("gym_scoop_active", "false");
   document.getElementById("scoopTimerBox").style.display = "none";
 }
 
