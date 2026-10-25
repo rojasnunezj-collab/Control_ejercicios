@@ -17,7 +17,7 @@ const TELEGRAM_CHAT_ID = "8933766777";
 const CATALOGO_RUTINA = [
   // Bloque 1: Empuje (Lunes y Jueves)
   { id: "b1_e1", nombre: "Compuesto: Remo vertical agarre abierto + Press militar con barra", peso: "Barra 24 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
-  { id: "b1_e2", nombre: "Press en Puente de Glúteos", peso: "Barra 24 kg / Manc. 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
+  { id: "b1_e2", nombre: "Press en Puente de Glúteos", peso: "2 Mancuernas de 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
   { id: "b1_e3", nombre: "Press Hexagonal (Squeeze Press) en Puente de Glúteos", peso: "2 Mancuernas de 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
   { id: "b1_e4", nombre: "Flexiones con Manos en Banco (Pecho Bajo)", peso: "Peso Corporal", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b1_e5", nombre: "Extensión de Tríceps tras Nuca / Copa sentado", peso: "Mancuerna 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
