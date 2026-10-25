@@ -264,6 +264,7 @@
           <button class="seg-btn" onclick="updateExConfig('descansoSerie', 30)">30s</button>
           <button class="seg-btn" onclick="updateExConfig('descansoSerie', 60)">60s</button>
           <button class="seg-btn" onclick="updateExConfig('descansoSerie', 90)">90s</button>
+          <button class="seg-btn" onclick="updateExConfig('descansoSerie', 120)">120s</button>
         </div>
       </div>
 
@@ -397,7 +398,7 @@ const RUTINA = {
       { id: "b2_e2", nombre: "Curl Inverso con Barra / Press Invertido", peso: "Barra 20 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0080-xNrS20v.gif" },
       { id: "b2_e3", nombre: "Curl Concentrado Sentado con Mancuerna", peso: "Mancuerna 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Brazo Izquierdo", "Brazo Derecho"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0297-gvsWLQw.gif" },
       { id: "b2_e4", nombre: "Encogimientos de Hombros tras Espalda con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0095-dG7tG5y.gif" },
-      { id: "b2_e5", nombre: "Superserie Hombros: Elevaciones Laterales + Vuelos Posteriores", peso: "Mancuernas 7 kg", series: 4, reps: 12, tipo: "superserie", partes: ["1/2: Elevaciones Laterales (7 kg)", "2/2: Vuelos Posteriores Inclinados (7 kg)"], prepDefault: 5, gifs: ["https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0334-DsgkuIt.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/2292-mu5Guxt.gif"] }
+      { id: "b2_e5", nombre: "Superserie Hombros: Elevaciones Laterales + Frontales + Vuelos Posteriores", peso: "2 Mancuernas de 7 kg", series: 4, reps: 12, tipo: "superserie", partes: ["1/3: Elevaciones Laterales (7 kg)", "2/3: Elevaciones Frontales (7 kg)", "3/3: Vuelos Posteriores Inclinados (7 kg)"], prepDefault: 5, gifs: ["https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0334-DsgkuIt.gif", "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/delts/dumbbell-front-raise.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/2292-mu5Guxt.gif"] }
     ]
   },
   b3: {
@@ -675,7 +676,8 @@ function getTargetRepsForCurrentPart(ex, partIdx = currentPartIdx) {
 }
 
 function getTotalPartsForCurrentSet(ex, set = currentSet) {
-  if (ex.tipo === "unilateral" || ex.tipo === "superserie") return 2;
+  if (ex.tipo === "unilateral") return 2;
+  if (ex.tipo === "superserie") return ex.partes ? ex.partes.length : 2;
   if (ex.tipo === "oblicuos_especial") {
     // En la serie 4 solo se hacen Giros Rusos (1 parte)
     return set <= 3 ? 3 : 1;
@@ -1660,7 +1662,7 @@ Equipamiento del usuario:
 - Banco y peso corporal.
 Rutina actual del usuario dividida en 3 bloques:
 - Bloque 1 (Lunes y Jueves - Empuje): Compuesto Remo vertical + Press militar (Barra 24kg), Press en puente de glúteos (2 Mancuernas de 7kg), Press hexagonal (2 Mancuernas de 7kg), Flexiones (corporal), Extensión tras nuca copa (1 Mancuerna 14kg), Fondos banco.
-- Bloque 2 (Martes y Viernes - Tracción): Curl de bíceps (Barra 24kg), Curl inverso (Barra 20kg), Curl concentrado (1 Mancuerna 14kg), Encogimientos (Barra 24kg), Superserie elevaciones laterales + vuelos (2 Mancuernas 7kg).
+- Bloque 2 (Martes y Viernes - Tracción): Curl de bíceps (Barra 24kg), Curl inverso (Barra 20kg), Curl concentrado (1 Mancuerna 14kg), Encogimientos (Barra 24kg), Superserie hombros: laterales + frontales + vuelos (2 Mancuernas 7kg).
 - Bloque 3 (Miércoles y Sábado - Piernas/Core): Compuesto cargada + press (Mancuerna 14kg), Sentadilla (Barra 24kg), Zancadas (2 Mancuernas 7kg), Elevación pantorrilla (Barra 24kg), Leñador (Mancuerna 14kg), Superserie giros rusos + plancha lateral.
 Estado de la sesión hoy:
 - Bloque seleccionado: ${currentBlock.titulo}

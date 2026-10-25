@@ -28,7 +28,7 @@ const CATALOGO_RUTINA = [
   { id: "b2_e2", nombre: "Curl Inverso con Barra / Press Invertido", peso: "Barra 20 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b2_e3", nombre: "Curl Concentrado Sentado con Mancuerna", peso: "Mancuerna 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b2_e4", nombre: "Encogimientos de Hombros tras Espalda con Barra", peso: "Barra 24 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
-  { id: "b2_e5", nombre: "Superserie Hombros: Elevaciones Laterales + Vuelos Posteriores", peso: "Mancuernas 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
+  { id: "b2_e5", nombre: "Superserie Hombros: Elevaciones Laterales + Frontales + Vuelos Posteriores", peso: "2 Mancuernas de 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
 
   // Bloque 3: Piernas, Oblicuos y Potencia (Miércoles y Sábado)
   { id: "b3_e1", nombre: "Compuesto Funcional: Cargada/Curl Neutro + Press Unilateral", peso: "Mancuerna 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
