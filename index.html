@@ -140,6 +140,27 @@
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 99; padding: 20px; align-items: center; justify-content: center; }
     .modal-content { background: var(--card); width: 100%; max-width: 420px; border-radius: 16px; padding: 18px; border: 1px solid var(--card-alt); }
     .input-text { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--card-alt); background: var(--bg); color: #fff; margin: 8px 0 14px; font-size: 0.85rem; }
+
+    /* Estilos del Chat del Entrenador IA */
+    .coach-msg-user {
+      align-self: flex-end;
+      background: #0284c7;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 12px 12px 2px 12px;
+      max-width: 85%;
+      line-height: 1.35;
+    }
+    .coach-msg-bot {
+      align-self: flex-start;
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 10px 12px;
+      border-radius: 12px 12px 12px 2px;
+      border: 1px solid var(--card-alt);
+      max-width: 90%;
+      line-height: 1.45;
+    }
   </style>
 </head>
 <body>
@@ -148,6 +169,7 @@
   <div class="header">
     <h1>🏋️ Mi Entreno en Casa <span style="font-size:0.65rem; background:#0284c7; color:#fff; padding:2px 7px; border-radius:6px; vertical-align:middle; font-weight:700;">v2.0</span></h1>
     <div style="display:flex; gap:6px;">
+      <button class="btn-icon" style="border-color:#38bdf8; color:#38bdf8; font-weight:700;" onclick="openCoachModal()">🤖 Coach</button>
       <button class="btn-icon" id="btnVoiceToggle" onclick="toggleVoice()">🔊 Voz: ON</button>
       <button class="btn-icon" onclick="openSettings()">⚙️ Sheets</button>
     </div>
@@ -306,9 +328,46 @@
       <input type="text" id="gasUrlInput" class="input-text" placeholder="https://script.google.com/macros/s/.../exec" />
       <label style="font-size:0.8rem; color:var(--muted);">Scoops actuales en tu bote de Pre-Entreno:</label>
       <input type="number" id="scoopTotalInput" class="input-text" value="30" />
+      <label style="font-size:0.8rem; color:var(--muted);">Clave Gemini API (Opcional para IA personalizada):</label>
+      <input type="password" id="geminiApiKeyInput" class="input-text" placeholder="AIzaSy... (Opcional, en aistudio.google.com)" />
       <div style="display:flex; gap:8px;">
         <button class="btn-quick" style="flex:1; background:var(--green);" onclick="saveSettings()">Guardar</button>
         <button class="btn-quick" style="flex:1;" onclick="closeSettings()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ENTRENADOR INTELIGENTE (AI COACH) -->
+  <div class="modal" id="coachModal">
+    <div class="modal-content" style="max-height:92vh; display:flex; flex-direction:column; padding:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h3 style="font-size:1.05rem; color:#38bdf8; display:flex; align-items:center; gap:6px;">
+          🤖 Entrenador Inteligente
+        </h3>
+        <button class="btn-quick" style="padding:4px 10px;" onclick="closeCoachModal()">✖ Cerrar</button>
+      </div>
+      
+      <!-- SUGERENCIAS RÁPIDAS -->
+      <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:8px; -webkit-overflow-scrolling:touch;">
+        <button class="pill" onclick="sendCoachQuickPrompt('Me duele el hombro, ¿qué ejercicios cambio hoy?')">🩹 Dolor hombro</button>
+        <button class="pill" onclick="sendCoachQuickPrompt('Me duele la rodilla, ¿cómo adapto el entreno?')">🩹 Dolor rodilla</button>
+        <button class="pill" onclick="sendCoachQuickPrompt('Hoy no puedo entrenar, ¿cómo reorganizo la semana?')">📅 Cambiar días</button>
+        <button class="pill" onclick="sendCoachQuickPrompt('Analiza mis tiempos y cómo mejorar')">📊 Mis tiempos</button>
+      </div>
+
+      <!-- HISTORIAL DE MENSAJES -->
+      <div id="coachChatContainer" style="flex:1; overflow-y:auto; background:#0b1120; border:1px solid var(--card-alt); border-radius:12px; padding:10px; margin-bottom:10px; display:flex; flex-direction:column; gap:10px; font-size:0.83rem; max-height:45vh;">
+        <div class="coach-msg-bot">
+          👋 <b>¡Hola! Soy tu Entrenador Inteligente.</b><br>
+          Conozco tu rutina exacta (Empuje, Tracción, Piernas) y tu equipamiento (barra de hasta 24 kg y 2 mancuernas de 7 kg que se unen en 14 kg).<br><br>
+          Dime si tienes dolor en alguna articulación, si hoy no puedes entrenar para reprogramarte, o pídeme analizar tus tiempos de series y descanso.
+        </div>
+      </div>
+
+      <!-- CAMPO DE ENTRADA Y ENVÍO -->
+      <div style="display:flex; gap:6px;">
+        <input type="text" id="coachInputText" class="input-text" placeholder="Escribe tu consulta aquí..." style="margin:0; flex:1;" onkeydown="if(event.key==='Enter') sendCoachMessage()" />
+        <button class="btn-giant btn-blue" style="width:auto; padding:0 14px; margin:0;" onclick="sendCoachMessage()">Enviar</button>
       </div>
     </div>
   </div>
@@ -380,6 +439,8 @@ let totalWorkSec = 0;
 let totalSetupSec = 0;
 let totalRestSec = 0;
 let preWorkoutTaken = false;
+let warmupCompletedMap = {};
+let isWarmupSet = false;
 
 let voiceEnabled = true;
 let audioCtx = null;
@@ -400,6 +461,9 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("scoopCountDisplay").innerText = scoopRemaining + " scoops";
   document.getElementById("gasUrlInput").value = gasUrl;
   document.getElementById("scoopTotalInput").value = scoopRemaining;
+  const savedKey = localStorage.getItem("gym_gemini_api_key") || "";
+  const keyInput = document.getElementById("geminiApiKeyInput");
+  if (keyInput) keyInput.value = savedKey;
 
   // Detectar día de la semana automáticamente (1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb)
   const day = new Date().getDay();
@@ -625,6 +689,8 @@ function selectBlock(blockKey) {
   currentExIdx = 0;
   activeExIdx = 0;
   exerciseProgress = {};
+  warmupCompletedMap = {};
+  isWarmupSet = false;
   currentSet = 1;
   currentPartIdx = 0;
   stage = "IDLE";
@@ -692,6 +758,80 @@ function clearTimers() {
   timerInterval = null;
   repTimeout = null;
   localStorage.removeItem("gym_rest_target_time");
+}
+
+function exerciseNeedsWarmup(ex) {
+  return ex && ex.peso && (ex.peso.includes("24 kg") || ex.peso.includes("20 kg"));
+}
+
+function startWarmupRoutine() {
+  initAudio();
+  clearTimers();
+  isWarmupSet = true;
+  currentRepCount = 0;
+  currentWorkSeconds = 0;
+  stage = "WARMUP_PREP";
+  prepRemainingSeconds = 6;
+  speak("Calentamiento con barra de 10 kilos. En posición.");
+  renderAll();
+
+  timerInterval = setInterval(() => {
+    prepRemainingSeconds--;
+    if (prepRemainingSeconds <= 3 && prepRemainingSeconds > 0) {
+      playBeep(520, 0.1);
+      speak(getRepNumberWord(prepRemainingSeconds));
+    }
+    renderStageBox();
+    if (prepRemainingSeconds <= 0) {
+      clearTimers();
+      startWarmupWork();
+    }
+  }, 1000);
+}
+
+function startWarmupWork() {
+  stage = "WARMUP_WORK";
+  currentRepCount = 0;
+  currentWorkSeconds = 0;
+  playBeep(880, 0.25, "triangle");
+  speak("¡Va! Diez repeticiones suaves.");
+  renderAll();
+
+  timerInterval = setInterval(() => {
+    currentWorkSeconds++;
+    totalWorkSec++;
+    updateTotalsUI();
+    renderStageBox();
+  }, 1000);
+
+  function scheduleWarmupRep() {
+    repTimeout = setTimeout(() => {
+      if (stage !== "WARMUP_WORK") return;
+      currentRepCount++;
+      playBeep(660, 0.08);
+      if (currentRepCount <= 10) {
+        speak(getRepNumberWord(currentRepCount));
+      }
+      renderStageBox();
+      if (currentRepCount < 10) {
+        scheduleWarmupRep();
+      } else {
+        playBeep(980, 0.3, "triangle");
+        speak("¡Calentamiento listo! Suelta la barra.");
+      }
+    }, 2400);
+  }
+  scheduleWarmupRep();
+}
+
+function finishWarmupSet() {
+  clearTimers();
+  const ex = getActiveEx();
+  warmupCompletedMap[ex.id] = true;
+  isWarmupSet = false;
+  stage = "IDLE";
+  speak("Calentamiento completado. Arma tus " + ex.peso + " para la primera serie.");
+  startRestTimer("REST_AFTER_SETUP", 40);
 }
 
 // 1. Iniciar Preparación (con opción de reiniciar si no estabas listo)
@@ -1109,16 +1249,57 @@ function renderStageBox() {
 
   if (stage === "IDLE") {
     box.classList.add("stage-idle");
-    banner.innerText = `SERIE ${currentSet} DE ${ex.series}${partLabel}`;
-    const fatPct = Math.round((FATIGUE_FACTORS[Math.min(currentSet - 1, 3)] - 1) * 100);
-    sub.innerText = fatPct > 0
-      ? `Ritmo ajustado por fatiga (+${fatPct}% más margen)`
-      : `Preparación: ${cfg.prepSeg}s antes de contar`;
-    giant.innerText = `0 / ${targetReps}`;
-    secTimer.innerText = `Descanso configurado: ${cfg.descansoSerie}s`;
+    const needsWarmup = exerciseNeedsWarmup(ex) && currentSet === 1 && !warmupCompletedMap[ex.id];
+
+    if (needsWarmup) {
+      banner.innerText = `🔥 PREVIA: CALENTAMIENTO (Barra 10 kg)`;
+      sub.innerText = `Recomendado antes de tus ${cfg.peso}: 10 reps suaves para articulaciones`;
+      giant.innerText = `0 / 10`;
+      secTimer.innerText = `Barra con 5 kg por lado para bombear sangre sin fatiga`;
+      controls.innerHTML = `
+        <button class="btn-giant btn-yellow" style="margin-bottom:8px;" onclick="startWarmupRoutine()">
+          🔥 HACER CALENTAMIENTO (Barra 10 kg - 10 reps)
+        </button>
+        <button class="btn-giant btn-green" onclick="startPrepCountdown()">
+          ▶️ SALTAR DIRECTO A SERIE 1 (${cfg.peso})
+        </button>
+      `;
+    } else {
+      banner.innerText = `SERIE ${currentSet} DE ${ex.series}${partLabel}`;
+      const fatPct = Math.round((FATIGUE_FACTORS[Math.min(currentSet - 1, 3)] - 1) * 100);
+      sub.innerText = fatPct > 0
+        ? `Ritmo ajustado por fatiga (+${fatPct}% más margen)`
+        : `Preparación: ${cfg.prepSeg}s antes de contar`;
+      giant.innerText = `0 / ${targetReps}`;
+      secTimer.innerText = `Descanso configurado: ${cfg.descansoSerie}s`;
+      controls.innerHTML = `
+        <button class="btn-giant btn-green" onclick="startPrepCountdown()">
+          ▶️ INICIAR SERIE ${currentSet}
+        </button>
+      `;
+    }
+  }
+  else if (stage === "WARMUP_PREP") {
+    box.classList.add("stage-prep");
+    banner.innerText = `⏳ EN POSICIÓN: CALENTAMIENTO`;
+    sub.innerText = "Barra ligera de 10 kg (5 kg por lado)";
+    giant.innerText = prepRemainingSeconds + "s";
+    secTimer.innerText = "10 repeticiones fluidas a ritmo suave";
     controls.innerHTML = `
-      <button class="btn-giant btn-green" onclick="startPrepCountdown()">
-        ▶️ INICIAR SERIE ${currentSet}
+      <button class="btn-quick" style="width:100%;" onclick="startWarmupWork()">
+        ⚡ Ya estoy listo, contar YA
+      </button>
+    `;
+  }
+  else if (stage === "WARMUP_WORK") {
+    box.classList.add("stage-work");
+    banner.innerText = `🟡 CALENTANDO CON BARRA 10 KG`;
+    sub.innerText = "Movimiento fluido y controlado";
+    giant.innerText = `${currentRepCount} / 10`;
+    secTimer.innerText = `⏱️ Tiempo: ${formatMMSS(currentWorkSeconds)}`;
+    controls.innerHTML = `
+      <button class="btn-giant btn-green" onclick="finishWarmupSet()">
+        ✅ TERMINÉ CALENTAMIENTO (Armar ${ex.peso})
       </button>
     `;
   }
@@ -1404,9 +1585,171 @@ function saveSettings() {
   scoopRemaining = Number(document.getElementById("scoopTotalInput").value) || 30;
   localStorage.setItem("gym_gas_url", gasUrl);
   localStorage.setItem("gym_scoops_left", String(scoopRemaining));
+  const keyInput = document.getElementById("geminiApiKeyInput");
+  if (keyInput) {
+    localStorage.setItem("gym_gemini_api_key", keyInput.value.trim());
+  }
   document.getElementById("scoopCountDisplay").innerText = scoopRemaining + " scoops";
   closeSettings();
   if (gasUrl) syncConfigsFromSheets();
+}
+
+// ============================================================================
+// ENTRENADOR INTELIGENTE (AI COACH)
+// ============================================================================
+function openCoachModal() {
+  document.getElementById("coachModal").style.display = "flex";
+}
+
+function closeCoachModal() {
+  document.getElementById("coachModal").style.display = "none";
+}
+
+function sendCoachQuickPrompt(promptText) {
+  document.getElementById("coachInputText").value = promptText;
+  sendCoachMessage(promptText);
+}
+
+function appendCoachChat(sender, text) {
+  const container = document.getElementById("coachChatContainer");
+  const msgDiv = document.createElement("div");
+  const msgId = "cmsg_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+  msgDiv.id = msgId;
+  msgDiv.className = sender === "user" ? "coach-msg-user" : "coach-msg-bot";
+  msgDiv.innerHTML = text.replace(/\n/g, "<br>");
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
+  return msgId;
+}
+
+function updateCoachChat(msgId, text) {
+  const el = document.getElementById(msgId);
+  if (el) {
+    el.innerHTML = text.replace(/\n/g, "<br>");
+    const container = document.getElementById("coachChatContainer");
+    if (container) container.scrollTop = container.scrollHeight;
+  }
+}
+
+async function sendCoachMessage(overrideText = null) {
+  const inputEl = document.getElementById("coachInputText");
+  const query = (overrideText || inputEl.value).trim();
+  if (!query) return;
+  if (!overrideText) inputEl.value = "";
+
+  appendCoachChat("user", query);
+  const typingId = appendCoachChat("assistant", "🤔 <i>Analizando tu rutina, equipamiento y datos...</i>");
+
+  try {
+    const answer = await queryCoachIntelligence(query);
+    updateCoachChat(typingId, answer);
+  } catch (e) {
+    updateCoachChat(typingId, "Error al consultar: " + e.message);
+  }
+}
+
+async function queryCoachIntelligence(userMsg) {
+  const apiKey = localStorage.getItem("gym_gemini_api_key") || "";
+  const ex = getActiveEx();
+  const currentBlock = RUTINA[currentBlockKey];
+
+  const systemContext = `Eres el Entrenador Personal Inteligente en Casa del usuario.
+Equipamiento del usuario:
+- 1 Barra larga que pesa aprox 5 kg sola. Se arma con 10 kg (5 kg por lado) para calentamiento, y hasta 20 kg y 24 kg para trabajo pesado.
+- 2 mancuernas de 7 kg cada una. Cuando se juntan los discos en una sola barra corta, forman 1 mancuerna de 14 kg.
+- Banco y peso corporal.
+Rutina actual del usuario dividida en 3 bloques:
+- Bloque 1 (Lunes y Jueves - Empuje): Compuesto Remo vertical + Press militar (Barra 24kg), Press en puente de glúteos (2 Mancuernas de 7kg), Press hexagonal (2 Mancuernas de 7kg), Flexiones (corporal), Extensión tras nuca copa (1 Mancuerna 14kg), Fondos banco.
+- Bloque 2 (Martes y Viernes - Tracción): Curl de bíceps (Barra 24kg), Curl inverso (Barra 20kg), Curl concentrado (1 Mancuerna 14kg), Encogimientos (Barra 24kg), Superserie elevaciones laterales + vuelos (2 Mancuernas 7kg).
+- Bloque 3 (Miércoles y Sábado - Piernas/Core): Compuesto cargada + press (Mancuerna 14kg), Sentadilla (Barra 24kg), Zancadas (2 Mancuernas 7kg), Elevación pantorrilla (Barra 24kg), Leñador (Mancuerna 14kg), Superserie giros rusos + plancha lateral.
+Estado de la sesión hoy:
+- Bloque seleccionado: ${currentBlock.titulo}
+- Ejercicio actual: ${ex ? ex.nombre : "Inicio"}
+- Tiempo en series: ${formatMMSS(totalWorkSec)}
+- Tiempo armando pesas: ${formatMMSS(totalSetupSec)}
+- Tiempo en descansos: ${formatMMSS(totalRestSec)}
+
+Responde de forma concisa, motivadora, empática y práctica en español. Si el usuario reporta dolor físico o molestia, dale alternativas seguras adaptadas a sus mancuernas o barra ligera. Si pide cambiar días, reprograma su semana cuidando que haya 48h de descanso entre grupos musculares. Si pregunta por sus tiempos, analiza sus métricas actuales.`;
+
+  if (apiKey) {
+    try {
+      const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            { role: "user", parts: [{ text: systemContext + "\n\nPregunta del usuario:\n" + userMsg }] }
+          ]
+        })
+      });
+      const data = await res.json();
+      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+        return data.candidates[0].content.parts[0].text;
+      }
+    } catch (e) {
+      console.warn("Fallo llamada a Gemini API, usando motor kinesiologico local:", e);
+    }
+  }
+
+  // Motor Inteligente Local Especializado
+  const q = userMsg.toLowerCase();
+
+  // 1. Dolor en hombro / deltoides / manguito
+  if (q.includes("hombro") || q.includes("manguito") || q.includes("rotador") || q.includes("clavicula")) {
+    return `🩺 <b>Adaptación para Dolor de Hombro:</b><br><br>` +
+      `1. <b>En Remo Vertical + Press Militar (b1_e1):</b> No subas los codos por encima de la línea del hombro en el remo para evitar pinzamiento. Si el press militar molesta, bájale a la <b>Barra de 10 kg</b> o usa tus <b>2 Mancuernas de 7 kg con agarre neutro</b> (palmas enfrentadas).<br>` +
+      `2. <b>Press en Suelo (b1_e2 y b1_e3):</b> Mantén los codos pegados a 45° del cuerpo (no abiertos en cruz).<br>` +
+      `3. <b>Elevaciones Laterales (b2_e5):</b> Inclina levemente el torso hacia adelante y eleva en el plano escapular (30° hacia adelante), no totalmente lateral.`;
+  }
+
+  // 2. Dolor en rodilla / pierna / menisco
+  if (q.includes("rodilla") || q.includes("menisco") || q.includes("patelar") || q.includes("cuadriceps")) {
+    return `🩺 <b>Adaptación para Dolor de Rodilla:</b><br><br>` +
+      `1. <b>Sentadilla (b3_e2):</b> Reduce de 24 kg a la <b>Barra de 10 kg</b> o haz la sentadilla hacia un banco/silla (Box Squat) para limitar la flexión a 90° sin impacto rotuliano.<br>` +
+      `2. <b>Zancadas (b3_e3):</b> Hazlas <b>hacia atrás (zancada reversa)</b> en vez de hacia adelante. La zancada hacia atrás reduce en un 60% la presión sobre el tendón rotuliano.<br>` +
+      `3. Si persiste molestia aguda, enfócate hoy en <b>Puente de Glúteos y Pantorrillas</b> que no cargan la articulación.`;
+  }
+
+  // 3. Dolor lumbar / espalda
+  if (q.includes("espalda") || q.includes("lumbar") || q.includes("columna")) {
+    return `🩺 <b>Protección Lumbar y Espalda:</b><br><br>` +
+      `1. <b>Activación de Core:</b> En sentadillas y remo, respira diafragmático y bloquea el abdomen antes de cada repetición.<br>` +
+      `2. <b>Leñador con Mancuerna (b3_e5):</b> Gira pivotando la punta del pie trasero y con la cadera; nunca gires forzando la cintura.<br>` +
+      `3. <b>Extensión de Tríceps tras nuca (b1_e5):</b> Apoya la espalda firmemente contra una pared o respaldo para no arquear la columna baja con los 14 kg.`;
+  }
+
+  // 4. Reprogramación de días / No entrenar hoy
+  if (q.includes("no haré") || q.includes("no puedo") || q.includes("cambiar") || q.includes("dia") || q.includes("mañana") || q.includes("tiempo")) {
+    if (q.includes("dia") || q.includes("no puedo") || q.includes("no haré") || q.includes("semana") || q.includes("cambiar")) {
+      return `📅 <b>Estrategia de Reprogramación Semanal:</b><br><br>` +
+        `• <b>Estructura base:</b> Bloque 1 (Lun/Jue - Empuje), Bloque 2 (Mar/Vie - Tracción), Bloque 3 (Mié/Sáb - Piernas).<br>` +
+        `• <b>Si no puedes entrenar hoy:</b> Descansa hoy sin culpa. Mañana retomas el bloque correspondiente. La regla clave es dejar <b>al menos 24 a 48h</b> entre entrenamientos del mismo grupo muscular.<br>` +
+        `• <b>Si sientes el tren superior agotado:</b> Salta hoy al <b>Bloque 3 (Piernas y Oblicuos)</b> tocando la pestaña superior.`;
+    }
+  }
+
+  // 5. Análisis de tiempos y métricas
+  if (q.includes("demoro") || q.includes("tiempo") || q.includes("mejorar") || q.includes("analiza") || q.includes("descanso")) {
+    const totalSessionSec = totalWorkSec + totalSetupSec + totalRestSec;
+    const workPct = totalSessionSec > 0 ? Math.round((totalWorkSec / totalSessionSec) * 100) : 0;
+    const restPct = totalSessionSec > 0 ? Math.round((totalRestSec / totalSessionSec) * 100) : 0;
+    const setupPct = totalSessionSec > 0 ? Math.round((totalSetupSec / totalSessionSec) * 100) : 0;
+
+    return `📊 <b>Análisis de tus Tiempos de Entrenamiento:</b><br><br>` +
+      `• 🟢 <b>Tiempo efectivo bajo tensión:</b> ${formatMMSS(totalWorkSec)} (${workPct}% de la sesión)<br>` +
+      `• 🟠 <b>Tiempo armando pesas:</b> ${formatMMSS(totalSetupSec)} (${setupPct}%)<br>` +
+      `• 🔵 <b>Tiempo en descanso:</b> ${formatMMSS(totalRestSec)} (${restPct}%)<br><br>` +
+      `💡 <b>Diagnóstico y Consejos:</b><br>` +
+      `1. Mantén tus descansos entre series en <b>60 segundos</b> para hipertrofia, y hasta <b>90 segundos</b> en ejercicios pesados como la sentadilla.<br>` +
+      `2. Deja tus discos de 5 kg y mancuernas de 7 kg cerca de la colchoneta para que el armado no tome más de 30-40 segundos.<br>` +
+      `3. Tu ritmo base por repetición está calibrado para estimular la fase excéntrica y maximizar la ganancia muscular.`;
+  }
+
+  // Respuesta general personalizada
+  return `💪 <b>Recomendación de tu Entrenador:</b><br><br>` +
+    `Entendido: "${userMsg}".<br><br>` +
+    `Recuerda que en tu rutina casera tienes disponible la <b>Barra de 10 kg para calentar</b> articulaciones antes de saltar a 24 kg, y tus <b>2 Mancuernas de 7 kg</b> para ejercicios unilaterales y press de pecho seguro en el suelo.<br><br>` +
+    `¿Quieres consultar sobre algún ejercicio en específico o ajustar los descansos?`;
 }
 </script>
 </body>
