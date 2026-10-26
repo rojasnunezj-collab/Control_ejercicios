@@ -229,6 +229,7 @@
         <span class="badge weight" id="exWeightBadge">24 kg</span>
         <span class="badge" id="exTargetBadge">4 series x 12 reps</span>
         <span class="badge side" id="exSideBadge" style="display:none;">Lado Izquierdo</span>
+        <span class="badge" id="exHomeBadge" style="display:none; color:#38bdf8; border-color:rgba(56,189,248,0.4);">🏠 En Suelo</span>
       </div>
     </div>
 
@@ -383,33 +384,33 @@ const RUTINA = {
   b1: {
     titulo: "Lunes y Jueves — Bloque 1: Empuje",
     ejercicios: [
-      { id: "b1_e1", nombre: "Compuesto: Remo vertical agarre abierto + Press militar con barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0028-SGY8Zui.gif" },
-      { id: "b1_e2", nombre: "Press en Puente de Glúteos", peso: "2 Mancuernas de 7 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0289-SpYC0Kp.gif" },
-      { id: "b1_e3", nombre: "Press Hexagonal (Squeeze Press) en Puente de Glúteos", peso: "2 Mancuernas de 7 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0303-1qrWgZ2.gif" },
-      { id: "b1_e4", nombre: "Flexiones con Manos en Banco (Pecho Bajo)", peso: "Peso Corporal", series: 4, reps: 12, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0493-B1EVP9F.gif" },
-      { id: "b1_e5", nombre: "Extensión de Tríceps tras Nuca / Copa sentado", peso: "Mancuerna 14 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/2188-kont8Ut.gif" },
-      { id: "b1_e6", nombre: "Fondos en Banco", peso: "Peso Corporal", series: 4, reps: 15, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0129-RrLske5.gif" }
+      { id: "b1_e1", nombre: "Compuesto: Remo vertical agarre abierto + Press militar con barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5, entornoCasa: "🏠 De Pie", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0028-SGY8Zui.gif" },
+      { id: "b1_e2", nombre: "Press de Pecho en Puente de Glúteos (en Suelo)", peso: "2 Mancuernas de 7 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, entornoCasa: "🏠 En Suelo / Colchoneta (Sin banca)", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0289-SpYC0Kp.gif" },
+      { id: "b1_e3", nombre: "Press Hexagonal Squeeze en Puente (en Suelo)", peso: "2 Mancuernas de 7 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, entornoCasa: "🏠 En Suelo / Colchoneta (Sin banca)", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0303-1qrWgZ2.gif" },
+      { id: "b1_e4", nombre: "Flexiones Inclinadas (en Silla o Sofá) / Suelo", peso: "Peso Corporal", series: 4, reps: 12, tipo: "normal", prepDefault: 5, entornoCasa: "🏠 En Silla, Sofá o Suelo", gif: "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/pectorals/push-up.gif" },
+      { id: "b1_e5", nombre: "Extensión de Tríceps tras Nuca (Copa en Silla o de Pie)", peso: "1 Mancuerna de 14 kg (juntada)", series: 4, reps: 10, tipo: "normal", prepDefault: 5, entornoCasa: "🏠 En Silla o de Pie", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/2188-kont8Ut.gif" },
+      { id: "b1_e6", nombre: "Fondos de Tríceps (en Silla o Sofá)", peso: "Peso Corporal", series: 4, reps: 15, tipo: "normal", prepDefault: 5, entornoCasa: "🏠 En Silla o Sofá", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0129-RrLske5.gif" }
     ]
   },
   b2: {
     titulo: "Martes y Viernes — Bloque 2: Tracción y Laterales",
     ejercicios: [
-      { id: "b2_e1", nombre: "Curl de Bíceps con Barra Recta de Pie", peso: "Barra 24 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0031-25GPyDY.gif" },
-      { id: "b2_e2", nombre: "Curl Inverso con Barra / Press Invertido", peso: "Barra 20 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0080-xNrS20v.gif" },
-      { id: "b2_e3", nombre: "Curl Concentrado Sentado con Mancuerna", peso: "Mancuerna 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Brazo Izquierdo", "Brazo Derecho"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0297-gvsWLQw.gif" },
-      { id: "b2_e4", nombre: "Encogimientos de Hombros tras Espalda con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0095-dG7tG5y.gif" },
-      { id: "b2_e5", nombre: "Superserie Hombros: Elevaciones Laterales + Frontales + Vuelos Posteriores", peso: "2 Mancuernas de 7 kg", series: 4, reps: 12, tipo: "superserie", partes: ["1/3: Elevaciones Laterales (7 kg)", "2/3: Elevaciones Frontales (7 kg)", "3/3: Vuelos Posteriores Inclinados (7 kg)"], prepDefault: 5, gifs: ["https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0334-DsgkuIt.gif", "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/delts/dumbbell-front-raise.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/2292-mu5Guxt.gif"] }
+      { id: "b2_e1", nombre: "Curl de Bíceps con Barra Recta de Pie", peso: "Barra 24 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5, entornoCasa: "🏠 De Pie", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0031-25GPyDY.gif" },
+      { id: "b2_e2", nombre: "Curl Inverso con Barra / Press Invertido", peso: "Barra 20 kg", series: 4, reps: 10, tipo: "normal", prepDefault: 5, entornoCasa: "🏠 De Pie", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0080-xNrS20v.gif" },
+      { id: "b2_e3", nombre: "Curl Alterno de Bíceps con Mancuernas", peso: "2 Mancuernas de 7 kg (14 kg total)", series: 3, reps: 10, tipo: "unilateral", partes: ["Brazo Izquierdo", "Brazo Derecho"], prepDefault: 5, entornoCasa: "🏠 De Pie o en Silla", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0285-BU15nH4.gif" },
+      { id: "b2_e4", nombre: "Encogimientos de Hombros tras Espalda con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 5, entornoCasa: "🏠 De Pie", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0095-dG7tG5y.gif" },
+      { id: "b2_e5", nombre: "Superserie Hombros: Elevaciones Laterales + Frontales + Vuelos Posteriores", peso: "2 Mancuernas de 7 kg", series: 4, reps: 12, tipo: "superserie", partes: ["1/3: Elevaciones Laterales (7 kg)", "2/3: Elevaciones Frontales (7 kg)", "3/3: Vuelos Posteriores Inclinados (7 kg)"], prepDefault: 5, entornoCasa: "🏠 De Pie / Inclinado", gifs: ["https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0334-DsgkuIt.gif", "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/delts/dumbbell-front-raise.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/2292-mu5Guxt.gif"] }
     ]
   },
   b3: {
     titulo: "Miércoles y Sábado — Bloque 3: Piernas, Oblicuos y Potencia",
     ejercicios: [
-      { id: "b3_e1", nombre: "Compuesto Funcional: Cargada/Curl Neutro + Press Unilateral", peso: "Mancuerna 14 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/1700-FS63wTN.gif" },
-      { id: "b3_e2", nombre: "Sentadilla con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0043-qXTaZnJ.gif" },
-      { id: "b3_e3", nombre: "Zancadas hacia adelante con Mancuernas", peso: "2 Mancuernas de 7 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Pierna Izquierda", "Pierna Derecha"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0336-RRWFUcw.gif" },
-      { id: "b3_e4", nombre: "Elevaciones de Pantorrilla con Barra", peso: "Barra 24 kg", series: 4, reps: 20, tipo: "normal", prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/1372-8ozhUIZ.gif" },
-      { id: "b3_e5", nombre: "Leñador Diagonal (Woodchopper) con Mancuerna", peso: "Mancuerna 14 kg", series: 4, reps: 12, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5, gif: "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/cable-twist-up-down.gif" },
-      { id: "b3_e6", nombre: "Superserie Oblicuos: Giros Rusos + Plancha Lateral", peso: "Mancuerna 14 kg / Corporal", series: 4, reps: 16, tipo: "oblicuos_especial", partes: ["1/3: Giros Rusos (16 reps)", "2/3: Plancha Lateral Izq (12 reps)", "3/3: Plancha Lateral Der (12 reps)"], prepDefault: 5, gifs: ["https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0687-XVDdcoj.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/3544-5VXmnV5.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/3544-5VXmnV5.gif"] }
+      { id: "b3_e1", nombre: "Compuesto Funcional: Cargada/Press Unilateral", peso: "1 Mancuerna de 14 kg (juntada)", series: 3, reps: 10, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5, entornoCasa: "🏠 De Pie (1 Mancuerna)", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0424-ocYc6Db.gif" },
+      { id: "b3_e2", nombre: "Sentadilla con Barra", peso: "Barra 24 kg", series: 4, reps: 12, tipo: "normal", prepDefault: 10, entornoCasa: "🏠 De Pie", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0043-qXTaZnJ.gif" },
+      { id: "b3_e3", nombre: "Zancadas hacia adelante con Mancuernas", peso: "2 Mancuernas de 7 kg", series: 3, reps: 10, tipo: "unilateral", partes: ["Pierna Izquierda", "Pierna Derecha"], prepDefault: 5, entornoCasa: "🏠 De Pie (Paso al frente)", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0336-RRWFUcw.gif" },
+      { id: "b3_e4", nombre: "Elevaciones de Pantorrilla con Barra", peso: "Barra 24 kg", series: 4, reps: 20, tipo: "normal", prepDefault: 5, entornoCasa: "🏠 De Pie", gif: "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/1372-8ozhUIZ.gif" },
+      { id: "b3_e5", nombre: "Leñador Diagonal (Woodchopper) con Mancuerna", peso: "1 Mancuerna de 14 kg (juntada)", series: 4, reps: 12, tipo: "unilateral", partes: ["Lado Izquierdo", "Lado Derecho"], prepDefault: 5, entornoCasa: "🏠 De Pie con Rotación", gif: "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/cable-twist-up-down.gif" },
+      { id: "b3_e6", nombre: "Superserie Oblicuos: Giros Rusos + Plancha Lateral", peso: "1 Mancuerna de 14 kg (o Corporal)", series: 4, reps: 16, tipo: "oblicuos_especial", partes: ["1/3: Giros Rusos (16 reps)", "2/3: Plancha Lateral Izq (12 reps)", "3/3: Plancha Lateral Der (12 reps)"], prepDefault: 5, entornoCasa: "🏠 En Suelo / Colchoneta", gifs: ["https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/0687-XVDdcoj.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/3544-5VXmnV5.gif", "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/videos/3544-5VXmnV5.gif"] }
     ]
   }
 };
@@ -433,6 +434,7 @@ let currentWorkSeconds = 0;
 let currentSetupSeconds = 0;
 let lastSetupLoggedSeconds = 0;
 let restRemainingSeconds = 0;
+let restTargetEndTime = 0;
 let prepRemainingSeconds = 0;
 let confirmedReps = 12;
 
@@ -621,6 +623,20 @@ function updateExConfig(field, value) {
   cfg[field] = value;
   localStorage.setItem("gym_configs_v1", JSON.stringify(savedConfigs));
   renderExerciseConfigButtons();
+
+  // Si estamos actualmente descansando y el usuario cambia el tiempo con los botones inferiores
+  if (field === "descansoSerie" && stage === "REST_SET") {
+    restTargetEndTime = Date.now() + value * 1000;
+    localStorage.setItem("gym_rest_target_time", String(restTargetEndTime));
+    restRemainingSeconds = value;
+    renderStageBox();
+  } else if (field === "descansoArmado" && stage === "REST_AFTER_SETUP") {
+    restTargetEndTime = Date.now() + value * 1000;
+    localStorage.setItem("gym_rest_target_time", String(restTargetEndTime));
+    restRemainingSeconds = value;
+    renderStageBox();
+  }
+
   sendToSheets({
     accion: "guardar_config",
     idEjercicio: ex.id,
@@ -759,6 +775,7 @@ function clearTimers() {
   if (repTimeout) clearTimeout(repTimeout);
   timerInterval = null;
   repTimeout = null;
+  restTargetEndTime = 0;
   localStorage.removeItem("gym_rest_target_time");
 }
 
@@ -1024,13 +1041,13 @@ function startRestTimer(restType, seconds) {
   currentExIdx = activeExIdx;
   stage = restType; // "REST_SET" o "REST_AFTER_SETUP"
   restRemainingSeconds = seconds;
-  const targetEndTime = Date.now() + seconds * 1000;
-  localStorage.setItem("gym_rest_target_time", String(targetEndTime));
+  restTargetEndTime = Date.now() + seconds * 1000;
+  localStorage.setItem("gym_rest_target_time", String(restTargetEndTime));
   renderAll();
 
   timerInterval = setInterval(() => {
     const now = Date.now();
-    const remaining = Math.max(0, Math.ceil((targetEndTime - now) / 1000));
+    const remaining = Math.max(0, Math.ceil((restTargetEndTime - now) / 1000));
     restRemainingSeconds = remaining;
     totalRestSec++;
     updateTotalsUI();
@@ -1052,10 +1069,12 @@ function startRestTimer(restType, seconds) {
 }
 
 function adjustRestLive(delta) {
-  const currentTarget = Number(localStorage.getItem("gym_rest_target_time") || (Date.now() + restRemainingSeconds * 1000));
-  const newTarget = currentTarget + delta * 1000;
-  localStorage.setItem("gym_rest_target_time", String(newTarget));
-  restRemainingSeconds = Math.max(0, Math.ceil((newTarget - Date.now()) / 1000));
+  if (!restTargetEndTime) {
+    restTargetEndTime = Date.now() + restRemainingSeconds * 1000;
+  }
+  restTargetEndTime += delta * 1000;
+  localStorage.setItem("gym_rest_target_time", String(restTargetEndTime));
+  restRemainingSeconds = Math.max(0, Math.ceil((restTargetEndTime - Date.now()) / 1000));
   renderStageBox();
 }
 
@@ -1063,6 +1082,7 @@ function syncRestTimerIfActive() {
   if (stage === "REST_SET" || stage === "REST_AFTER_SETUP") {
     const target = Number(localStorage.getItem("gym_rest_target_time") || 0);
     if (!target) return;
+    restTargetEndTime = target;
     const now = Date.now();
     const remaining = Math.max(0, Math.ceil((target - now) / 1000));
     restRemainingSeconds = remaining;
@@ -1140,6 +1160,16 @@ function renderAll() {
     sideBadge.innerText = "👉 " + viewedEx.partes[prog.currentPartIdx];
   } else {
     sideBadge.style.display = "none";
+  }
+
+  const homeBadge = document.getElementById("exHomeBadge");
+  if (homeBadge) {
+    if (viewedEx.entornoCasa) {
+      homeBadge.style.display = "inline-block";
+      homeBadge.innerText = viewedEx.entornoCasa;
+    } else {
+      homeBadge.style.display = "none";
+    }
   }
 
   // Actualizar demostración visual (GIF / Imagen)
@@ -1656,14 +1686,14 @@ async function queryCoachIntelligence(userMsg) {
   const currentBlock = RUTINA[currentBlockKey];
 
   const systemContext = `Eres el Entrenador Personal Inteligente en Casa del usuario.
-Equipamiento del usuario:
+Equipamiento del usuario y entorno:
+- Entrena 100% en CASA, SIN BANCA de gimnasio. Para el pecho usa el suelo/colchoneta (press en puente de glúteos), y para fondos/flexiones usa una silla común, sofá o el suelo.
 - 1 Barra larga que pesa aprox 5 kg sola. Se arma con 10 kg (5 kg por lado) para calentamiento, y hasta 20 kg y 24 kg para trabajo pesado.
 - 2 mancuernas de 7 kg cada una. Cuando se juntan los discos en una sola barra corta, forman 1 mancuerna de 14 kg.
-- Banco y peso corporal.
 Rutina actual del usuario dividida en 3 bloques:
-- Bloque 1 (Lunes y Jueves - Empuje): Compuesto Remo vertical + Press militar (Barra 24kg), Press en puente de glúteos (2 Mancuernas de 7kg), Press hexagonal (2 Mancuernas de 7kg), Flexiones (corporal), Extensión tras nuca copa (1 Mancuerna 14kg), Fondos banco.
-- Bloque 2 (Martes y Viernes - Tracción): Curl de bíceps (Barra 24kg), Curl inverso (Barra 20kg), Curl concentrado (1 Mancuerna 14kg), Encogimientos (Barra 24kg), Superserie hombros: laterales + frontales + vuelos (2 Mancuernas 7kg).
-- Bloque 3 (Miércoles y Sábado - Piernas/Core): Compuesto cargada + press (Mancuerna 14kg), Sentadilla (Barra 24kg), Zancadas (2 Mancuernas 7kg), Elevación pantorrilla (Barra 24kg), Leñador (Mancuerna 14kg), Superserie giros rusos + plancha lateral.
+- Bloque 1 (Lunes y Jueves - Empuje): Compuesto Remo vertical + Press militar (Barra 24kg), Press de pecho en puente en suelo (2 Mancuernas 7kg), Press hexagonal en puente en suelo (2 Mancuernas 7kg), Flexiones inclinadas en silla/suelo (corporal), Extensión tras nuca copa (1 Mancuerna 14kg), Fondos en silla/sofá (corporal).
+- Bloque 2 (Martes y Viernes - Tracción): Curl de bíceps (Barra 24kg), Curl inverso (Barra 20kg), Curl alterno de bíceps con mancuernas (2 Mancuernas 7kg = 14kg total), Encogimientos (Barra 24kg), Superserie hombros: laterales + frontales + vuelos (2 Mancuernas 7kg).
+- Bloque 3 (Miércoles y Sábado - Piernas/Core): Compuesto cargada + press unilateral (1 Mancuerna 14kg), Sentadilla (Barra 24kg), Zancadas (2 Mancuernas 7kg), Elevación pantorrilla (Barra 24kg), Leñador (1 Mancuerna 14kg), Superserie giros rusos + plancha lateral.
 Estado de la sesión hoy:
 - Bloque seleccionado: ${currentBlock.titulo}
 - Ejercicio actual: ${ex ? ex.nombre : "Inicio"}

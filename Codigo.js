@@ -17,26 +17,26 @@ const TELEGRAM_CHAT_ID = "8933766777";
 const CATALOGO_RUTINA = [
   // Bloque 1: Empuje (Lunes y Jueves)
   { id: "b1_e1", nombre: "Compuesto: Remo vertical agarre abierto + Press militar con barra", peso: "Barra 24 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
-  { id: "b1_e2", nombre: "Press en Puente de Glúteos", peso: "2 Mancuernas de 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
-  { id: "b1_e3", nombre: "Press Hexagonal (Squeeze Press) en Puente de Glúteos", peso: "2 Mancuernas de 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
-  { id: "b1_e4", nombre: "Flexiones con Manos en Banco (Pecho Bajo)", peso: "Peso Corporal", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
-  { id: "b1_e5", nombre: "Extensión de Tríceps tras Nuca / Copa sentado", peso: "Mancuerna 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
-  { id: "b1_e6", nombre: "Fondos en Banco", peso: "Peso Corporal", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
+  { id: "b1_e2", nombre: "Press de Pecho en Puente de Glúteos (en Suelo)", peso: "2 Mancuernas de 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
+  { id: "b1_e3", nombre: "Press Hexagonal Squeeze en Puente (en Suelo)", peso: "2 Mancuernas de 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
+  { id: "b1_e4", nombre: "Flexiones Inclinadas (en Silla o Sofá) / Suelo", peso: "Peso Corporal", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
+  { id: "b1_e5", nombre: "Extensión de Tríceps tras Nuca (Copa en Silla o de Pie)", peso: "1 Mancuerna de 14 kg (juntada)", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
+  { id: "b1_e6", nombre: "Fondos de Tríceps (en Silla o Sofá)", peso: "Peso Corporal", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
 
   // Bloque 2: Tracción y Laterales (Martes y Viernes)
   { id: "b2_e1", nombre: "Curl de Bíceps con Barra Recta de Pie", peso: "Barra 24 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b2_e2", nombre: "Curl Inverso con Barra / Press Invertido", peso: "Barra 20 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
-  { id: "b2_e3", nombre: "Curl Concentrado Sentado con Mancuerna", peso: "Mancuerna 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
+  { id: "b2_e3", nombre: "Curl Alterno de Bíceps con Mancuernas", peso: "2 Mancuernas de 7 kg (14 kg total)", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b2_e4", nombre: "Encogimientos de Hombros tras Espalda con Barra", peso: "Barra 24 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b2_e5", nombre: "Superserie Hombros: Elevaciones Laterales + Frontales + Vuelos Posteriores", peso: "2 Mancuernas de 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
 
   // Bloque 3: Piernas, Oblicuos y Potencia (Miércoles y Sábado)
-  { id: "b3_e1", nombre: "Compuesto Funcional: Cargada/Curl Neutro + Press Unilateral", peso: "Mancuerna 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
+  { id: "b3_e1", nombre: "Compuesto Funcional: Cargada/Press Unilateral", peso: "1 Mancuerna de 14 kg (juntada)", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b3_e2", nombre: "Sentadilla con Barra", peso: "Barra 24 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 10, segPorRep: 2.8 },
   { id: "b3_e3", nombre: "Zancadas hacia adelante con Mancuernas", peso: "2 Mancuernas de 7 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
   { id: "b3_e4", nombre: "Elevaciones de Pantorrilla con Barra", peso: "Barra 24 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
-  { id: "b3_e5", nombre: "Leñador Diagonal (Woodchopper) con Mancuerna", peso: "Mancuerna 14 kg", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
-  { id: "b3_e6", nombre: "Superserie Oblicuos: Giros Rusos + Plancha Lateral", peso: "Mancuerna 14 kg / Corporal", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 }
+  { id: "b3_e5", nombre: "Leñador Diagonal (Woodchopper) con Mancuerna", peso: "1 Mancuerna de 14 kg (juntada)", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 },
+  { id: "b3_e6", nombre: "Superserie Oblicuos: Giros Rusos + Plancha Lateral", peso: "1 Mancuerna de 14 kg (o Corporal)", descansoSerie: 60, descansoArmado: 30, prepSeg: 5, segPorRep: 2.8 }
 ];
 
 function inicializarHojas() {
