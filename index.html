@@ -1064,15 +1064,20 @@
 let exerciseCompletedSets = JSON.parse(localStorage.getItem("gym_completed_sets_v2") || "{}");
 
 function triggerHaptic(type = "impact", style = "medium") {
-  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-    try {
-      if (type === "impact") Telegram.WebApp.HapticFeedback.impactOccurred(style);
-      else if (type === "notification") Telegram.WebApp.HapticFeedback.notificationOccurred(style);
-      else if (type === "selection") Telegram.WebApp.HapticFeedback.selectionChanged();
-    } catch (e) {}
-  } else if (navigator.vibrate) {
-    navigator.vibrate(style === "heavy" ? 40 : 20);
-  }
+  try {
+    const tg = window.Telegram && window.Telegram.WebApp;
+    if (tg && tg.HapticFeedback) {
+      if (type === "impact") tg.HapticFeedback.impactOccurred(style);
+      else if (type === "notification") tg.HapticFeedback.notificationOccurred(style);
+      else if (type === "selection") tg.HapticFeedback.selectionChanged();
+      return;
+    }
+  } catch (e) {}
+  try {
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(style === "heavy" ? 40 : 20);
+    }
+  } catch (e) {}
 }
 
 function getEquipmentSetupAdvice(ex, pesoTexto) {
@@ -1516,6 +1521,9 @@ function clearTimers() {
   repTimeout = null;
   restTargetEndTime = 0;
   localStorage.removeItem("gym_rest_target_time");
+  if ("speechSynthesis" in window) {
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+  }
 }
 
 function exerciseNeedsWarmup(ex) {
@@ -1526,6 +1534,21 @@ function exerciseNeedsWarmup(ex) {
 }
 
 // Iniciar uno de los 2 calentamientos (step 1 = Activación, step 2 = Aproximación)
+function skipWarmupFromIdle() {
+  clearTimers();
+  const ex = getActiveEx();
+  warmupCompletedMap[ex.id] = true;
+  isWarmupSet = false;
+  speak("Directo a serie uno con " + ex.peso);
+  startPrepCountdown();
+}
+
+function cancelPrep() {
+  clearTimers();
+  stage = "IDLE";
+  renderAll();
+}
+
 function startWarmupRoutine(step = 1) {
   initAudio();
   clearTimers();
@@ -1558,14 +1581,16 @@ function startWarmupRoutine(step = 1) {
 }
 
 function startWarmupWork() {
+  initAudio();
+  clearTimers();
   stage = "WARMUP_WORK";
   currentRepCount = 0;
   currentWorkSeconds = 0;
   playBeep(880, 0.25, "triangle");
   if (currentWarmupStep === 1) {
-    speak("¡Va! Diez repeticiones suaves para lubricar articulaciones.");
+    speak("¡Va! Diez repeticiones suaves.");
   } else {
-    speak("¡Va! Diez repeticiones de aproximación, sintiendo el movimiento.");
+    speak("¡Va! Diez repeticiones de aproximación.");
   }
   renderAll();
 
@@ -1590,19 +1615,19 @@ function startWarmupWork() {
       } else {
         playBeep(980, 0.3, "triangle");
         if (currentWarmupStep === 1) {
-          speak("¡Calentamiento uno listo! Suelta la barra y respira.");
-          setTimeout(() => {
+          speak("¡Listo! Suelta la barra.");
+          repTimeout = setTimeout(() => {
             if (stage === "WARMUP_WORK" && currentWarmupStep === 1) {
               startWarmupRest();
             }
-          }, 2000);
+          }, 1800);
         } else {
-          speak("¡Ambos ejercicios de calentamiento listos! Suelta la barra.");
-          setTimeout(() => {
+          speak("¡Calentamientos completados! Suelta la barra.");
+          repTimeout = setTimeout(() => {
             if (stage === "WARMUP_WORK" && currentWarmupStep === 2) {
               finishWarmupSet();
             }
-          }, 2000);
+          }, 1800);
         }
       }
     }, 2400);
@@ -1618,7 +1643,7 @@ function startWarmupRest(seconds = 25) {
   restTargetEndTime = Date.now() + seconds * 1000;
   localStorage.setItem("gym_rest_target_time", String(restTargetEndTime));
   playBeep(700, 0.15);
-  speak("Descanso breve entre calentamientos. Veinticinco segundos.");
+  speak("Descanso breve entre calentamientos.");
   renderAll();
 
   timerInterval = setInterval(() => {
@@ -1649,10 +1674,6 @@ function adjustWarmupRestLive(delta) {
   playBeep(600, 0.05);
   renderStageBox();
   renderSeriesPills();
-  const setupAdviceEl = document.getElementById("exSetupAdviceBadge");
-  if (setupAdviceEl) {
-    setupAdviceEl.textContent = getEquipmentSetupAdvice(viewedEx, cfg.peso);
-  }
 }
 
 function finishWarmupSet() {
@@ -1661,8 +1682,7 @@ function finishWarmupSet() {
   warmupCompletedMap[ex.id] = true;
   isWarmupSet = false;
   currentWarmupStep = 1;
-  stage = "IDLE";
-  speak("¡Excelente! Ambos ejercicios de calentamiento completados. Tienes cuarenta y cinco segundos para armar tus " + ex.peso + " para la primera serie.");
+  speak("Calentamiento listo. Prepara tus " + ex.peso + " para la primera serie.");
   startRestTimer("REST_AFTER_SETUP", 45);
 }
 
@@ -1672,12 +1692,10 @@ function cancelWarmupAndGoToWork() {
   warmupCompletedMap[ex.id] = true;
   isWarmupSet = false;
   currentWarmupStep = 1;
-  stage = "IDLE";
-  speak("Calentamiento saltado. Vamos a la serie uno.");
+  speak("Listo, iniciando serie uno con " + ex.peso);
   startPrepCountdown();
 }
 
-// 1. Iniciar Preparación (con opción de reiniciar si no estabas listo)
 function startPrepCountdown(extraSeconds = 0) {
   initAudio();
   clearTimers();
@@ -1712,10 +1730,6 @@ function addPrepTime(sec) {
   speak("Más " + sec + " segundos");
   renderStageBox();
   renderSeriesPills();
-  const setupAdviceEl = document.getElementById("exSetupAdviceBadge");
-  if (setupAdviceEl) {
-    setupAdviceEl.textContent = getEquipmentSetupAdvice(viewedEx, cfg.peso);
-  }
 }
 
 // 2. En Serie (Marcapasos con Compensación de Fatiga + Reloj de Esfuerzo)
@@ -1791,10 +1805,6 @@ function adjustConfirmedReps(delta) {
   confirmedReps = Math.max(1, confirmedReps + delta);
   renderStageBox();
   renderSeriesPills();
-  const setupAdviceEl = document.getElementById("exSetupAdviceBadge");
-  if (setupAdviceEl) {
-    setupAdviceEl.textContent = getEquipmentSetupAdvice(viewedEx, cfg.peso);
-  }
 }
 
 function confirmSetAndProceed(calibratePace = false) {
@@ -1924,12 +1934,9 @@ function adjustRestLive(delta) {
   restTargetEndTime += delta * 1000;
   localStorage.setItem("gym_rest_target_time", String(restTargetEndTime));
   restRemainingSeconds = Math.max(0, Math.ceil((restTargetEndTime - Date.now()) / 1000));
+  playBeep(600, 0.05);
   renderStageBox();
   renderSeriesPills();
-  const setupAdviceEl = document.getElementById("exSetupAdviceBadge");
-  if (setupAdviceEl) {
-    setupAdviceEl.textContent = getEquipmentSetupAdvice(viewedEx, cfg.peso);
-  }
 }
 
 function syncRestTimerIfActive() {
@@ -2177,7 +2184,7 @@ function renderStageBox() {
         <button class="btn-giant btn-yellow" style="margin-bottom:8px;" onclick="startWarmupRoutine(1)">
           🔥 INICIAR LOS 2 CALENTAMIENTOS (Barra 10 kg)
         </button>
-        <button class="btn-giant btn-green" onclick="startPrepCountdown()">
+        <button class="btn-giant btn-green" onclick="skipWarmupFromIdle()">
           ▶️ SALTAR DIRECTO A SERIE 1 (${cfg.peso})
         </button>
       `;
@@ -2193,7 +2200,7 @@ function renderStageBox() {
         <button class="btn-giant btn-green" onclick="startPrepCountdown()">
           ▶️ INICIAR SERIE ${currentSet}
         </button>
-        ${currentSet === 1 ? `
+        ${(currentSet === 1 && !warmupCompletedMap[ex.id]) ? `
           <button class="btn-quick" style="width:100%; margin-top:8px; opacity:0.85;" onclick="startWarmupRoutine(1)">
             🔥 Hacer 2 series de calentamiento previo (Barra 10 kg)
           </button>
@@ -2234,17 +2241,23 @@ function renderStageBox() {
         <button class="btn-giant btn-yellow" style="margin-bottom:8px;" onclick="startWarmupRest()">
           ➡️ PASAR AL CALENTAMIENTO 2 (Aproximación)
         </button>
+        <button class="btn-quick" style="width:100%; margin-bottom:6px;" onclick="cancelWarmupAndGoToWork()">
+          ⏩ Ir directo a Serie 1 (${cfg.peso})
+        </button>
         <button class="btn-quick" style="width:100%;" onclick="startWarmupRoutine(1)">
-          🔄 Reiniciar este calentamiento 1
+          🔄 Reiniciar calentamiento 1
         </button>
       `;
     } else {
       controls.innerHTML = `
         <button class="btn-giant btn-green" style="margin-bottom:8px;" onclick="finishWarmupSet()">
-          ✅ TERMINÉ LOS 2 CALENTAMIENTOS (Armar ${cfg.peso})
+          ✅ TERMINÉ CALENTAMIENTO ➔ ARMAR PESAS (45s)
+        </button>
+        <button class="btn-quick" style="width:100%; margin-bottom:6px;" onclick="cancelWarmupAndGoToWork()">
+          ⚡ Ir directo a Serie 1 (${cfg.peso})
         </button>
         <button class="btn-quick" style="width:100%;" onclick="startWarmupRoutine(2)">
-          🔄 Reiniciar este calentamiento 2
+          🔄 Reiniciar calentamiento 2
         </button>
       `;
     }
@@ -2276,12 +2289,13 @@ function renderStageBox() {
     giant.innerText = prepRemainingSeconds + "s";
     secTimer.innerText = "El conteo por voz empezará al llegar a 0";
     controls.innerHTML = `
-      <button class="btn-giant btn-yellow" onclick="addPrepTime(5)">
-        ✋ +5 SEGUNDOS MÁS (Aún me estoy acomodando)
-      </button>
-      <button class="btn-quick" style="width:100%;" onclick="startActiveWorkSet()">
+      <button class="btn-giant btn-green" style="margin-bottom:8px;" onclick="startActiveWorkSet()">
         ⚡ Ya estoy listo, contar YA
       </button>
+      <div class="quick-row">
+        <button class="btn-quick" onclick="addPrepTime(5)">✋ +5s Más</button>
+        <button class="btn-quick" onclick="cancelPrep()">❌ Cancelar</button>
+      </div>
     `;
   }
   else if (stage === "WORK") {
