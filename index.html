@@ -906,7 +906,7 @@
         <button class="btn-toggle-media" id="btnToggleMedia" onclick="toggleExerciseMedia()">👁️ Ocultar</button>
       </div>
       <div class="ex-media-wrapper" id="exMediaWrapper">
-        <img id="exGifImg" src="" alt="Demostración del ejercicio" loading="lazy" />
+        <img id="exGifImg" src="" alt="Demostración del ejercicio" />
       </div>
     </div>
 
@@ -1169,17 +1169,6 @@ let currentRepCount = 0;
 let currentWorkSeconds = 0;
 let currentSetupSeconds = 0;
 let lastSetupLoggedSeconds = 0;
-  if (!exerciseCompletedSets[ex.id]) exerciseCompletedSets[ex.id] = [];
-  exerciseCompletedSets[ex.id] = exerciseCompletedSets[ex.id].filter(c => c.set !== currentSet);
-  exerciseCompletedSets[ex.id].push({
-    set: currentSet,
-    reps: confirmedReps,
-    peso: cfg.peso,
-    timeSec: currentWorkSeconds,
-    timestamp: new Date().toLocaleTimeString()
-  });
-  localStorage.setItem("gym_completed_sets_v2", JSON.stringify(exerciseCompletedSets));
-  triggerHaptic("notification", "success");
 let restRemainingSeconds = 0;
 let restTargetEndTime = 0;
 let prepRemainingSeconds = 0;
@@ -2498,26 +2487,32 @@ function syncConfigsFromSheets() {
     badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> <span>Conectando Sheets...</span>`;
     badge.className = "sync-pill connecting";
   }
-  fetch(gasUrl)
+  const controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), 6000) : null;
+  const fetchOpts = controller ? { signal: controller.signal } : {};
+
+  fetch(gasUrl, fetchOpts)
     .then(r => r.json())
     .then(data => {
+      clearTimeout(timeoutId);
       if (data && data.configs) {
         savedConfigs = { ...savedConfigs, ...data.configs };
         localStorage.setItem("gym_configs_v1", JSON.stringify(savedConfigs));
         if (badge) {
           const count = Object.keys(data.configs).length;
-          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> <span>Sheets Conectado (${count})</span>`;
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> <span>Sheets (${count} activos)</span>`;
           badge.className = "sync-pill connected";
         }
         renderAll();
       }
     })
     .catch((err) => {
-      console.warn("No se pudo conectar directamente con Apps Script:", err);
+      clearTimeout(timeoutId);
+      console.warn("Aviso conexión Sheets:", err);
       if (badge) {
         const hasCached = Object.keys(savedConfigs).length > 0;
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> <span>${hasCached ? 'Sheets (Caché local)' : 'Sin conexión Sheets'}</span>`;
-        badge.className = "sync-pill offline";
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> <span>${hasCached ? 'Rutina Lista (Caché)' : 'Modo local listo'}</span>`;
+        badge.className = "sync-pill connected";
       }
     });
 }
